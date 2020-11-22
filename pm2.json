@@ -1,0 +1,10 @@
+{
+  "apps": [
+      {
+          "name": "myapp",
+          "cwd": ".",
+          "script": "npm",
+          "args" : "start"
+      }
+  ]
+}
