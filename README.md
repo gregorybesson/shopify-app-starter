@@ -15,10 +15,11 @@ It contains ready to use services to make the dev of your shopify app fast and e
 - Full Shopify API : REST + GraphQL, including REST and GQL pagination and GQL batches
 - S3 service : You can save or get any file on a S3 share (import images, export a catalog of products...)
 - DynamoDB database : We keep the permanent token + stores by default and you can use it to extend the schema to persist whatever you need
+- Cache service : very useful if you need to cache rarely written data / frequently read data like a products collection filter or whatever
 
 /\ Important /\
-This starter use a customized version of shopify-app-cli and authenticates the user logged through Shopify : It will only use the permanent token for CRON by default.
-This way, you may check the users's right and identify him. If you want to use the permanent token, you mays do it through the db service.
+This starter uses a customized version of shopify-app-cli and authenticates the logged in user through Shopify : It will only use the permanent token for CRON by default.
+This way, you may check the users's rights and identify him. If you want to use the permanent token, you may do it through the db service.
 
 # Installation
 Clone the starter then npm i
@@ -55,7 +56,7 @@ This directory is dedicated to your nextJS pages appearing in the Shoify's BO If
    3. use the redirection https://lc-mydemo.ngrok.io/auth/callback
    4. Note the API key and secret
 3. enter the api key and secret key in your .env file
-4. Change your .env parameters accordingly (DATABASE, HOST, S3BUCKET, ...)
+4. copy .env.dist to .env and change your .env parameters accordingly (DATABASE, HOST, S3BUCKET, ...)
 5. Start the server `PORT=8088 npm run dev` then launch your ngrok tunnel `ngrok http 8088 --subdomain=lc-mydemo`
 6. Install the app using the link on your partner's app webpage
 
