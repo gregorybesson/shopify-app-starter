@@ -6,6 +6,7 @@ import graphQLProxy, { ApiVersion } from "@shopify/koa-shopify-graphql-proxy";
 import Koa from "koa";
 import next from "next";
 import Router from "koa-router";
+import Cookies from "cookies";
 import session from "koa-session";
 import _ from "lodash";
 import * as handlers from "./handlers/index";
@@ -14,6 +15,7 @@ import * as webhooks from "./webhooks";
 import cors from "@koa/cors";
 import * as db from "./database";
 import * as cron from "../app/cron";
+let cacheProvider = require('./cacheProvider')
 
 // we authorize Ajax calls to unverified CERTS
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
@@ -33,12 +35,11 @@ async function forceOnlineMode(ctx, next) {
   const { shop } = query;
   let forceOnlineMode = false;
 
-  // console.log('session.accessToken', accessToken, shop, ctx.url);
+  //console.log('session.accessToken', accessToken, shop, ctx.url);
   // console.log('ctx.session.associatedUser', ctx.session.associatedUser);
 
   if (ctx.url.includes("/auth/") || ctx.url.endsWith("/auth")) {
-    // console.log('on va check la bdd');
-    // console.log('query', query)
+    //console.log('on va check la bdd');
     const item = await db.getItem({ store: shop, sk: "settings" });
     //console.log('item', item);
     if (_.get(item, "Item.accessToken")) {
@@ -66,15 +67,18 @@ async function forceOnlineMode(ctx, next) {
 }
 
 cron.init();
+cacheProvider.start(function (err) {
+  if (err) console.error(err)
+})
 
 app.prepare().then(() => {
   const server = new Koa();
   server.proxy = true;
   const router = new Router();
-  // FIX : The redirect loop with chrome incognito or Safari
+  // FIX : DOES NOT WORK The redirect loop with chrome incognito or Safari
   // server.use((ctx, next) => {
   //   const cookies = new Cookies(ctx.req, ctx.res, {
-  //     keys: app.keys,
+  //     keys: server.keys,
   //     secure: true,
   //   });
 
@@ -115,7 +119,6 @@ app.prepare().then(() => {
         const { shop, accessToken } = ctx.session;
         let registerOffline = true;
 
-        //console.log('shop pendant l\'authent', shop)
         await db.createTable();
         let item = await db.getItem({ store: shop, sk: "settings" });
         if (_.get(item, "Item.accessToken")) {
@@ -123,8 +126,6 @@ app.prepare().then(() => {
         }
 
         if (!item || _.isEmpty(item)) {
-          //console.log('on crée le settings pour ', shop, ' avec ', accessToken);
-
           await db.addItem({
             store: shop,
             sk: "settings",

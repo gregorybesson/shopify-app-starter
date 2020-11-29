@@ -10,7 +10,9 @@ import { getFulfillmentServiceByName } from "./fulfillmentService";
 
 dotenv.config();
 
-const { SHOP } = process.env;
+const {
+  SHOP,
+} = process.env;
 
 /**
  * Get the inventoryLevelId from a SKU

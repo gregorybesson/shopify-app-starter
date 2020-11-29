@@ -9,7 +9,7 @@ import * as services from "../services";
 
 dotenv.config();
 
-const { SHOP, HOST } = process.env;
+const { HOST } = process.env;
 const shopifyRouter = new Router({ prefix: "/shopify" });
 
 shopifyRouter.get("/test-delete-store", koaBody(), async (ctx) => {
@@ -690,6 +690,27 @@ shopifyRouter.get("/get-carrierServices", koaBody(), async (ctx) => {
   ctx.body = {
     status: "success",
     result: result,
+  };
+});
+
+// /filter-products/accessoires?tag_color=color_NOIR%2Bcolor_BORDEAUX&page=1&pagination=2&tag_size=size_44/45
+shopifyRouter.get("/filter-products/:collectionHandle", koaBody(), async (ctx) => {
+  const collectionHandle = ctx.params.collectionHandle;
+  const filters = []
+  let pageSize = ctx.query["pagination"] ?? 30
+  let page = ctx.query["page"] ?? 1;
+  for (const key in ctx.query) {
+    if (key.startsWith('tag_')) {
+      const tagValues = ctx.query[key].split('+')
+      filters.push(tagValues)
+    }
+  }
+
+  let publishedProducts = await services.filterProductsCollectionByHandle(collectionHandle, filters);
+
+  ctx.body = {
+    status: "success",
+    result: publishedProducts.slice((page - 1) * pageSize, page * pageSize),
   };
 });
 

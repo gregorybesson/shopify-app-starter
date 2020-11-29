@@ -13,7 +13,6 @@ AWS.config.update({
 
 const dynamodb = new AWS.DynamoDB();
 const docClient = new AWS.DynamoDB.DocumentClient();
-
 const delay = ms => new Promise(res => setTimeout(res, ms));
 
 export const createTable = async () => {
@@ -54,8 +53,6 @@ export const addItem = async (item) => {
     Item: item,
   };
 
-  console.log('addItem', params);
-
   try {
     const data = await docClient.put(params).promise();
     //console.log("addItem Success");
@@ -73,7 +70,6 @@ export const getItem = async (key) => {
     TableName: DATABASE,
     Key: key,
   };
-  //console.log('item', params);
 
   try {
     const data = await docClient.get(params).promise();
