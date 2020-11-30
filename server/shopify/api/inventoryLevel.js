@@ -2,7 +2,7 @@ import axios from "axios";
 import dotenv from "dotenv";
 import _ from "lodash";
 
-import { getUrl, getNextPage } from "../query";
+import { get, put, post, del, getUrl, getNextPage } from "../query";
 
 dotenv.config();
 
@@ -29,11 +29,11 @@ dotenv.config();
  * Uses the cursor pagination
  */
 export const getInventoryLevels = async (location_ids) => {
-  let nextPage = `${getUrl()}/inventory_levels.json?limit=250&location_ids=${location_ids}`;
+  let nextPage = `/inventory_levels.json?limit=250&location_ids=${location_ids}`;
   let arResult = [];
 
   while (nextPage) {
-    const result = await axios.get(nextPage);
+    const result = await get(nextPage);
     arResult = [...arResult, ...result.data.inventory_levels];
     nextPage = getNextPage(result.headers);
   }
@@ -42,7 +42,7 @@ export const getInventoryLevels = async (location_ids) => {
 };
 
 export const connectInventoryLevel = async (locationId, inventoryItemId) => {
-  const result = await axios.post(`${getUrl()}/inventory_levels/connect.json`, {
+  const result = await post(`/inventory_levels/connect.json`, {
     location_id: locationId,
     inventory_item_id: inventoryItemId,
     relocate_if_necessary: true,
@@ -59,7 +59,7 @@ export const updateInventoryLevel = async (
   let result = null;
 
   try {
-    const req = await axios.post(`${getUrl()}/inventory_levels/adjust.json`, {
+    const req = await post(`/inventory_levels/adjust.json`, {
       location_id: locationId,
       inventory_item_id: inventoryItemId,
       available_adjustment: availableAdjustment,

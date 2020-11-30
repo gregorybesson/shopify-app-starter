@@ -2,7 +2,7 @@ import axios from "axios";
 import dotenv from "dotenv";
 import _ from "lodash";
 import Bottleneck from "bottleneck";
-import { getUrl, getNextPage } from "../query";
+import { get, put, post, del, getUrl, getNextPage } from "../query";
 
 dotenv.config();
 
@@ -46,7 +46,7 @@ export const setMetafield = async (id, type, changeset) => {
   //    value_type: "json_string",
   // }
   try {
-    await axios.post(`${getUrl()}/${type}/${id}/metafields.json`, {
+    await post(`/${type}/${id}/metafields.json`, {
       metafield: changeset,
     });
   } catch (e) {
@@ -67,9 +67,8 @@ export const setMetafield = async (id, type, changeset) => {
 export const getMetafield = async (id, type, key) => {
   let result = [];
   try {
-    await axios
-      .get(
-        `${getUrl()}/${type}/${id}/metafields.json?[namespace]=cms&[key]=${key}`
+    await get(
+        `/${type}/${id}/metafields.json?[namespace]=cms&[key]=${key}`
       )
       .then((response) => {
         result = response.data.metafields;
@@ -90,8 +89,8 @@ export const getMetafield = async (id, type, key) => {
 export const deleteMetafield = async (id, type, metafieldId) => {
   let success = true;
   try {
-    await axios.delete(
-      `${getUrl()}/${type}/${id}/metafields/${metafieldId}.json`
+    await del(
+      `/${type}/${id}/metafields/${metafieldId}.json`
     );
   } catch (e) {
     console.log("error", e);
@@ -108,8 +107,8 @@ export const updateMetafield = async (id, type, changeset) => {
   //    value: data.value,
   // }
   try {
-    await axios.put(
-      `${getUrl()}/${type}/${id}/metafields/${changeset.id}.json`,
+    await put(
+      `/${type}/${id}/metafields/${changeset.id}.json`,
       {
         metafield: changeset,
       }

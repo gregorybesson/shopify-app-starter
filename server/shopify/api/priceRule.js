@@ -2,7 +2,7 @@ import axios from "axios";
 import dotenv from "dotenv";
 import _ from "lodash";
 
-import { getUrl } from "../query";
+import { get, put, post, del, getUrl } from "../query";
 
 dotenv.config();
 
@@ -27,13 +27,13 @@ dotenv.config();
 */
 
 // export const getGiftCards = async () => {
-//   const result = await axios.get(`${getUrl()}/price_rules.json`);
+//   const result = await get(`/price_rules.json`);
 
 //   return result.data.gift_cards;
 // };
 
 // export const getGiftCard = async (giftCardId) => {
-//   const result = await axios.get(`${getUrl()}/gift_cards/${giftCardId}.json`);
+//   const result = await get(`/gift_cards/${giftCardId}.json`);
 
 //   return result.data.gift_card;
 // };
@@ -53,7 +53,7 @@ export const createPriceRule = async (changeset) => {
   console.log("changeset createPriceRule", changeset);
 
   try {
-    const req = await axios.post(`${getUrl()}/price_rules.json`, {
+    const req = await post(`/price_rules.json`, {
       price_rule: changeset,
     });
     result = req.data;
@@ -74,8 +74,8 @@ export const createPriceRule = async (changeset) => {
 //       ...changeset,
 //     },
 //   };
-//   const result = await axios.put(
-//     `${getUrl()}/gift_cards/${giftCardId}.json`,
+//   const result = await put(
+//     `/gift_cards/${giftCardId}.json`,
 //     changeset
 //   );
 
@@ -83,8 +83,8 @@ export const createPriceRule = async (changeset) => {
 // };
 
 // export const disableGiftCard = async (giftCardId) => {
-//   const result = await axios.post(
-//     `${getUrl()}/gift_cards/${giftCardId}/disable.json`
+//   const result = await post(
+//     `/gift_cards/${giftCardId}/disable.json`
 //   );
 
 //   return result.data;

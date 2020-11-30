@@ -2,7 +2,7 @@ import axios from "axios";
 import dotenv from "dotenv";
 import _ from "lodash";
 import Bottleneck from "bottleneck";
-import { getUrl, getNextPage } from "../query";
+import { get, put, post, del, getUrl, getNextPage } from "../query";
 
 dotenv.config();
 
@@ -26,19 +26,19 @@ const { SHOP, ACCESS_TOKEN } = process.env;
  */
 
 export const getCollects = async () => {
-  const result = await axios.get(`${getUrl()}/collects.json`);
+  const result = await get(`/collects.json`);
 
   return result.data.collects;
 };
 
 export const getCollect = async (id) => {
-  const result = await axios.get(`${getUrl()}/collects/${id}.json`);
+  const result = await get(`/collects/${id}.json`);
 
   return result.data.collect;
 };
 
 export const createCollect = async (changeset) => {
-  const result = await axios.post(`${getUrl()}/collects.json`, {
+  const result = await post(`/collects.json`, {
     collect: changeset,
   });
 
@@ -46,7 +46,7 @@ export const createCollect = async (changeset) => {
 };
 
 export const deleteCollect = async (id) => {
-  const result = await axios.delete(`${getUrl()}/collects/${id}.json`);
+  const result = await del(`/collects/${id}.json`);
 
   return result.data;
 };

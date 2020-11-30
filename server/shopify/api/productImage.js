@@ -2,7 +2,7 @@ import axios from "axios";
 import dotenv from "dotenv";
 import _ from "lodash";
 import Bottleneck from "bottleneck";
-import { getUrl, getNextPage } from "../query";
+import { get, put, post, del, getUrl, getNextPage } from "../query";
 
 dotenv.config();
 
@@ -31,7 +31,7 @@ const { SHOP, ACCESS_TOKEN } = process.env;
 export const getProductImages = async (id) => {
   let result = [];
   try {
-    const req = await axios.get(`${getUrl()}/products/${id}/images.json`);
+    const req = await get(`/products/${id}/images.json`);
     result = req.data.images;
   } catch (e) {
     console.log(
@@ -53,7 +53,7 @@ export const createProductImage = async (id, changeset) => {
   //console.log('image url', changeset);
 
   try {
-    const req = await axios.post(`${getUrl()}/products/${id}/images.json`, {
+    const req = await post(`/products/${id}/images.json`, {
       image: changeset,
     });
 
@@ -86,8 +86,8 @@ export const updateProductImage = async (id, imageId, changeset) => {
   console.log("product id", id, "imageId", imageId, "changeset", changeset);
 
   try {
-    const image = await axios.put(
-      `${getUrl()}/products/${id}/images/${imageId}.json`,
+    const image = await put(
+      `/products/${id}/images/${imageId}.json`,
       {
         image: changeset,
       }
@@ -108,9 +108,9 @@ export const updateProductImage = async (id, imageId, changeset) => {
 export const deleteProductImage = async (id, imageId) => {
   let result = null;
   try {
-    const url = `${getUrl()}/products/${id}/images/${imageId}.json`;
+    const url = `/products/${id}/images/${imageId}.json`;
 
-    const query = await axios.delete(url);
+    const query = await del(url);
     result = query.data;
   } catch (e) {
     console.log(

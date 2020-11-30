@@ -2,7 +2,7 @@ import axios from "axios";
 import dotenv from "dotenv";
 import _ from "lodash";
 import Bottleneck from "bottleneck";
-import { getUrl, getNextPage } from "../query";
+import { get, put, post, del, getUrl, getNextPage } from "../query";
 
 dotenv.config();
 
@@ -139,12 +139,12 @@ export const getProductVariantsBySku = async (sku) => {
 
   let result = null;
   try {
-    const req = await axios.post(`${getUrl()}/graphql.json`, query);
+    const req = await post(`/graphql.json`, query);
 
     result = req.data.data.products.edges;
   } catch (e) {
     console.log(
-      "getAllOrdersGQ error :",
+      "getProductVariantsBySku error :",
       _.get(e, "response.data.errors", _.get(e, "response.data.error", e))
     );
   }
@@ -153,7 +153,7 @@ export const getProductVariantsBySku = async (sku) => {
 };
 
 export const getProductVariants = async (id) => {
-  const result = await axios.get(`${getUrl()}/products/${id}/variants.json`);
+  const result = await get(`/products/${id}/variants.json`);
 
   return result.data;
 };
@@ -162,7 +162,7 @@ export const getVariant = async (id) => {
   let result = null;
 
   try {
-    const req = await axios.get(`${getUrl()}/variants/${id}.json`);
+    const req = await get(`/variants/${id}.json`);
 
     result = req.data.variant;
   } catch (e) {
@@ -178,7 +178,7 @@ export const getVariant = async (id) => {
 export const getVariantMetafields = async (id) => {
   let result = [];
   try {
-    const req = await axios.get(`${getUrl()}/variants/${id}/metafields.json`);
+    const req = await get(`/variants/${id}/metafields.json`);
     result = req.data.metafields;
   } catch (e) {
     console.log(
@@ -207,8 +207,8 @@ export const updateVariant = async (variantId, changeset) => {
   let result = null;
 
   try {
-    const variant = await axios.put(
-      `${getUrl()}/variants/${variantId}.json`,
+    const variant = await put(
+      `/variants/${variantId}.json`,
       changeset
     );
     //console.log('bucket shopify', variant.headers['X-Shopify-Shop-Api-Call-Limit']);

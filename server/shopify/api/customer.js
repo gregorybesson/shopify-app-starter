@@ -2,7 +2,7 @@ import axios from "axios";
 import dotenv from "dotenv";
 import _ from "lodash";
 import Bottleneck from "bottleneck";
-import { getUrl, getNextPage } from "../query";
+import { get, put, post, del, getUrl, getNextPage } from "../query";
 
 dotenv.config();
 
@@ -44,7 +44,7 @@ export const getCustomer = async (id) => {
   let result = null;
 
   try {
-    const req = await axios.get(`${getUrl()}/customers/${id}.json`);
+    const req = await get(`/customers/${id}.json`);
 
     result = req.data.customer;
   } catch (e) {
@@ -60,7 +60,7 @@ export const getCustomer = async (id) => {
 export const getCustomerMetafields = async (id) => {
   let result = [];
   try {
-    const req = await axios.get(`${getUrl()}/customers/${id}/metafields.json`);
+    const req = await get(`/customers/${id}/metafields.json`);
     result = req.data.metafields;
   } catch (e) {
     // console.log(
@@ -89,8 +89,8 @@ export const updateCustomer = async (customerId, changeset) => {
   let result = null;
 
   try {
-    const customer = await axios.put(
-      `${getUrl()}/customers/${customerId}.json`,
+    const customer = await put(
+      `/customers/${customerId}.json`,
       changeset
     );
 

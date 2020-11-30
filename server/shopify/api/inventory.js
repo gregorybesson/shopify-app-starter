@@ -4,7 +4,7 @@ import _ from "lodash";
 import fs from "fs";
 import readline from "readline";
 
-import { getUrl } from "../query";
+import { get, put, post, del, getUrl } from "../query";
 import { getLocations } from "./location";
 import { getFulfillmentServiceByName } from "./fulfillmentService";
 
@@ -44,7 +44,7 @@ export const updateInventoryFromInventoryLevel = async (
     },
   };
 
-  const result = await axios.post(
+  const result = await post(
     `https://${SHOP}/admin/api/2020-04/graphql.json`,
     query,
     {
@@ -89,7 +89,7 @@ export const getInventoryLevelFromSku = async (filter) => {
 
   let result = null;
   try {
-    const req = await axios.post(`${getUrl()}/graphql.json`, query);
+    const req = await post(`/graphql.json`, query);
 
     result = req.data.data.productVariants.edges;
   } catch (e) {
@@ -143,7 +143,7 @@ export const createBulkOperation = async (query) => {
     }`,
   };
 
-  const op = await axios.post(`${getUrl()}/graphql.json`, mutation);
+  const op = await post(`/graphql.json`, mutation);
 
   //console.log('bulkOperation errors', op.data.data.bulkOperationRunQuery.userErrors)
 
@@ -194,7 +194,7 @@ export const getCurrentBulkOperation = async () => {
     }`,
   };
 
-  return axios.post(`${getUrl()}/graphql.json`, query);
+  return post(`/graphql.json`, query);
 };
 
 /**
@@ -317,7 +317,7 @@ export const updateInventoryBulk = async (chunkInventory) => {
 
   let result = null;
   try {
-    const req = await axios.post(`${getUrl()}/graphql.json`, query);
+    const req = await post(`/graphql.json`, query);
 
     result = req.data.data;
   } catch (e) {
@@ -469,7 +469,7 @@ export const getProductsByTag = async (tag) => {
           }
         }`,
       };
-      req = await axios.post(`${getUrl()}/graphql.json`, query);
+      req = await post(`/graphql.json`, query);
       //console.log('response', req.data);
 
       const pageInventory = req.data.data.products.edges;

@@ -2,7 +2,7 @@ import axios from "axios";
 import dotenv from "dotenv";
 import _ from "lodash";
 import Bottleneck from "bottleneck";
-import { getUrl, getNextPage } from "../query";
+import { get, put, post, getUrl, getNextPage } from "../query";
 
 dotenv.config();
 
@@ -113,7 +113,7 @@ export const getAllOrdersGQL = async (filter = "") => {
           }
         }`,
       };
-      req = await axios.post(`${getUrl()}/graphql.json`, query);
+      req = await post(`/graphql.json`, query);
       const pageOrders = req.data.data.orders.edges;
       orders.push(...pageOrders);
       cursor =
@@ -140,14 +140,14 @@ export const getAllOrders = async (filter = []) => {
   filter = ["limit=250", ...filter];
   const queryString = filter.join("&");
 
-  console.log("queryString", `${getUrl()}/orders.json?${queryString}`);
+  console.log("queryString", `/orders.json?${queryString}`);
 
-  let nextPage = `${getUrl()}/orders.json?${queryString}`;
+  let nextPage = `/orders.json?${queryString}`;
   let arResult = [];
 
   try {
     while (nextPage) {
-      const result = await axios.get(nextPage);
+      const result = await get(nextPage);
       arResult = [...arResult, ...result.data.orders];
       nextPage = getNextPage(result.headers);
     }
@@ -162,13 +162,13 @@ export const getAllOrders = async (filter = []) => {
 };
 
 export const getOrder = async (id) => {
-  const result = await axios.get(`${getUrl()}/orders/${id}.json`);
+  const result = await get(`/orders/${id}.json`);
 
   return result.data.order;
 };
 
 export const getOrderMetafields = async (id) => {
-  const result = await axios.get(`${getUrl()}/orders/${id}/metafields.json`);
+  const result = await get(`/orders/${id}/metafields.json`);
 
   return result.data.metafields;
 };
@@ -189,7 +189,7 @@ export const updateOrder = async (orderId, changeset, async = false) => {
   if (!async) {
     let result = false;
     try {
-      result = await axios.put(`${getUrl()}/orders/${orderId}.json`, changeset);
+      result = await put(`/orders/${orderId}.json`, changeset);
     } catch (e) {
       console.log("error in shopify.updateOrder", e.response.data);
       return false;
@@ -197,24 +197,24 @@ export const updateOrder = async (orderId, changeset, async = false) => {
 
     return result.data;
   } else {
-    return axios.put(`${getUrl()}/orders/${orderId}.json`, changeset);
+    return put(`/orders/${orderId}.json`, changeset);
   }
 };
 
 export const closeOrder = async (id) => {
-  const result = await axios.post(`${getUrl()}/orders/${id}/close.json`, {});
+  const result = await post(`/orders/${id}/close.json`, {});
 
   return result.data.order;
 };
 
 export const reopenOrder = async (id) => {
-  const result = await axios.post(`${getUrl()}/orders/${id}/open.json`, {});
+  const result = await post(`/orders/${id}/open.json`, {});
 
   return result.data.order;
 };
 
 export const cancelOrder = async (id) => {
-  const result = await axios.post(`${getUrl()}/orders/${id}/cancel.json`, {});
+  const result = await post(`/orders/${id}/cancel.json`, {});
 
   return result.data.order;
 };

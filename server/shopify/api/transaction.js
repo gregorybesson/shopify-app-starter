@@ -2,7 +2,7 @@ import axios from "axios";
 import dotenv from "dotenv";
 import _ from "lodash";
 
-import { getUrl } from "../query";
+import { get, put, post, del, getUrl } from "../query";
 
 dotenv.config();
 
@@ -21,8 +21,8 @@ dotenv.config();
 */
 
 export const getTransactions = async (orderId) => {
-  const result = await axios.get(
-    `${getUrl()}/orders/${orderId}/transactions.json`
+  const result = await get(
+    `/orders/${orderId}/transactions.json`
   );
 
   return result.data.transactions;

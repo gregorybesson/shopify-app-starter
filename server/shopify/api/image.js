@@ -2,7 +2,7 @@ import axios from "axios";
 import dotenv from "dotenv";
 import _ from "lodash";
 import Bottleneck from "bottleneck";
-import { getUrl, getNextPage } from "../query";
+import { get, put, post, del, getUrl, getNextPage } from "../query";
 
 export const uploadImages = async (sources) => {
   sources = {
@@ -41,7 +41,7 @@ export const uploadImages = async (sources) => {
 
   let result = null;
   try {
-    const req = await axios.post(`${getUrl()}/graphql.json`, query);
+    const req = await post(`/graphql.json`, query);
     console.log("req", req.data);
     result = req.data;
   } catch (e) {

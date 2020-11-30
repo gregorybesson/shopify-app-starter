@@ -14,7 +14,9 @@ import defaultRouter from "./routes/defaultRouter";
 import * as webhooks from "./webhooks";
 import cors from "@koa/cors";
 import * as db from "./database";
+import * as shopify from "./shopify";
 import * as cron from "../app/cron";
+import { validateSignature } from "../utils/validateSignature";
 let cacheProvider = require('./cacheProvider')
 
 // we authorize Ajax calls to unverified CERTS
@@ -28,6 +30,24 @@ const app = next({
 });
 const handle = app.getRequestHandler();
 const { SHOPIFY_API_SECRET, SHOPIFY_API_KEY, SCOPES, DATABASE } = process.env;
+
+async function prepareAuthSession(ctx, next) {
+  const { session, query } = ctx;
+  const shopQuery =  query["shop"]
+  let { shop, accessToken } = session;
+  if (shop && accessToken) {
+    shopify.setSettings({ shopName: shop, accessToken: accessToken })
+  } else if (shopQuery) {
+    shop = shopQuery
+    const isValid = validateSignature(query)
+    const item = await db.getItem({ store: shop, sk: "settings" });
+    if (_.get(item, "Item.accessToken")) {
+      shopify.setSettings({ shopName: shop, accessToken: _.get(item, "Item.accessToken") })
+    }
+  }
+
+  await next();
+}
 
 async function forceOnlineMode(ctx, next) {
   const { session, query } = ctx;
@@ -107,6 +127,7 @@ app.prepare().then(() => {
   );
   server.keys = [SHOPIFY_API_SECRET];
   server.use(forceOnlineMode);
+  server.use(prepareAuthSession)
   server.use(
     createShopifyAuth({
       apiKey: SHOPIFY_API_KEY,
@@ -181,7 +202,6 @@ app.prepare().then(() => {
       version: ApiVersion.July20,
     })
   );
-  //server.use(verifyRequest())
   server.use(defaultRouter.routes(), defaultRouter.allowedMethods());
   // defaultRouter.get("*", verifyRequest(), async ctx => {
   //   await handle(ctx.req, ctx.res);

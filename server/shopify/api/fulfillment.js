@@ -2,7 +2,7 @@ import axios from "axios";
 import dotenv from "dotenv";
 import _ from "lodash";
 
-import { getUrl } from "../query";
+import { get, put, post, del, getUrl } from "../query";
 import { getFulfillmentServiceByName } from "./fulfillmentService";
 
 dotenv.config();
@@ -46,24 +46,24 @@ dotenv.config();
 */
 
 export const getFulfillments = async (orderId) => {
-  const result = await axios.get(
-    `${getUrl()}/orders/${orderId}/fulfillments.json`
+  const result = await get(
+    `/orders/${orderId}/fulfillments.json`
   );
 
   return result.data.fulfillments;
 };
 
 export const getFulfillment = async (orderId, fulfillmentId) => {
-  const result = await axios.get(
-    `${getUrl()}/orders/${orderId}/fulfillments/${fulfillmentId}.json`
+  const result = await get(
+    `/orders/${orderId}/fulfillments/${fulfillmentId}.json`
   );
 
   return result.data.fulfillment;
 };
 
 export const getFulfillmentOrderFulfillments = async (fulfillment_order_id) => {
-  const result = await axios.get(
-    `${getUrl()}/fulfillment_orders/${fulfillment_order_id}/fulfillments.json`
+  const result = await get(
+    `/fulfillment_orders/${fulfillment_order_id}/fulfillments.json`
   );
 
   return result.data.fulfillments;
@@ -74,8 +74,8 @@ export const createFulfillment = async (orderId) => {
   const locationId = _.get(service, "location_id", null);
   let result = null;
   try {
-    const req = await axios.post(
-      `${getUrl()}/orders/${orderId}/fulfillments.json`,
+    const req = await post(
+      `/orders/${orderId}/fulfillments.json`,
       {
         fulfillment: {
           location_id: locationId,
@@ -95,8 +95,8 @@ export const createFulfillment = async (orderId) => {
 };
 
 export const updateFulfillment = async (orderId, fulfillmentId, changeset) => {
-  const result = await axios.put(
-    `${getUrl()}/orders/${orderId}/fulfillments/${fulfillmentId}.json`,
+  const result = await put(
+    `/orders/${orderId}/fulfillments/${fulfillmentId}.json`,
     {
       fulfillment: changeset,
     }
@@ -114,8 +114,8 @@ export const updateTracking = async (fulfillmentId, changeset) => {
   //     "company": "my-company"
   //   }
   // }
-  const result = await axios.post(
-    `${getUrl()}/fulfillments/${fulfillmentId}/update_tracking.json`,
+  const result = await post(
+    `/fulfillments/${fulfillmentId}/update_tracking.json`,
     {
       fulfillment: changeset,
     }
@@ -125,8 +125,8 @@ export const updateTracking = async (fulfillmentId, changeset) => {
 };
 
 export const openFulfillment = async (orderId, fulfillmentId) => {
-  const result = await axios.post(
-    `${getUrl()}/orders/${orderId}/fulfillments/${fulfillmentId}/open.json`,
+  const result = await post(
+    `/orders/${orderId}/fulfillments/${fulfillmentId}/open.json`,
     {}
   );
 
@@ -134,8 +134,8 @@ export const openFulfillment = async (orderId, fulfillmentId) => {
 };
 
 export const completeFulfillment = async (orderId, fulfillmentId) => {
-  const result = await axios.post(
-    `${getUrl()}/orders/${orderId}/fulfillments/${fulfillmentId}/complete.json`,
+  const result = await post(
+    `/orders/${orderId}/fulfillments/${fulfillmentId}/complete.json`,
     {}
   );
 
@@ -143,8 +143,8 @@ export const completeFulfillment = async (orderId, fulfillmentId) => {
 };
 
 export const cancelFulfillment = async (orderId, fulfillmentId) => {
-  const result = await axios.post(
-    `${getUrl()}/orders/${orderId}/fulfillments/${fulfillmentId}/cancel.json`,
+  const result = await post(
+    `/orders/${orderId}/fulfillments/${fulfillmentId}/cancel.json`,
     {}
   );
 

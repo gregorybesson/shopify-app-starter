@@ -2,7 +2,7 @@ import axios from "axios";
 import dotenv from "dotenv";
 import _ from "lodash";
 
-import { getUrl } from "../query";
+import { get, put, post, del, getUrl } from "../query";
 
 dotenv.config();
 
@@ -25,8 +25,8 @@ export const createFulfillmentRequest = async (
 ) => {
   //changeset = {message: "Fulfill this ASAP please."};
 
-  const result = await axios.get(
-    `${getUrl()}/fulfillment_orders/${fulfillmentOrderId}/fulfillment_request.json`,
+  const result = await get(
+    `/fulfillment_orders/${fulfillmentOrderId}/fulfillment_request.json`,
     {
       fulfillment_request: changeset,
     }
@@ -41,8 +41,8 @@ export const acceptFulfillmentRequest = async (
 ) => {
   //changeset = {message: "Ok to fulfill your request."};
 
-  const result = await axios.get(
-    `${getUrl()}/fulfillment_orders/${fulfillmentOrderId}/fulfillment_request/accept.json`,
+  const result = await get(
+    `/fulfillment_orders/${fulfillmentOrderId}/fulfillment_request/accept.json`,
     {
       fulfillment_request: changeset,
     }
@@ -57,8 +57,8 @@ export const rejectFulfillmentRequest = async (
 ) => {
   //changeset = {message: "Not OK to fulfill your request."};
 
-  const result = await axios.get(
-    `${getUrl()}/fulfillment_orders/${fulfillmentOrderId}/fulfillment_request/reject.json`,
+  const result = await get(
+    `/fulfillment_orders/${fulfillmentOrderId}/fulfillment_request/reject.json`,
     {
       fulfillment_request: changeset,
     }

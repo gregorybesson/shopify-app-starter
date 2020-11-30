@@ -1,5 +1,5 @@
 import axios from "axios";
-import { getUrl, getHeaders } from "../query";
+import { get, put, post, del, getUrl, getHeaders } from "../query";
 import _ from "lodash";
 
 /**
@@ -19,8 +19,8 @@ import _ from "lodash";
 export const getSections = async () => {
   const cmsSections = {};
   const activeTheme = await getActiveTheme();
-  const resultAssets = await axios.get(
-    `${getUrl()}/themes/${activeTheme.id}/assets.json`
+  const resultAssets = await get(
+    `/themes/${activeTheme.id}/assets.json`
   );
   const sections = resultAssets.data.assets.filter(
     (asset) => asset.key.startsWith("sections/") && !asset.key.includes("-lc-")
@@ -77,7 +77,7 @@ export const getSections = async () => {
 };
 
 export const getActiveTheme = async () => {
-  const resultThemes = await axios.get(`${getUrl()}/themes.json`);
+  const resultThemes = await get(`/themes.json`);
 
   return resultThemes.data.themes.find((theme) => theme.role === "main");
 };
@@ -85,14 +85,12 @@ export const getActiveTheme = async () => {
 //GET /admin/api/2020-04/themes/#{theme_id}/assets.json?asset[key]=assets/bg-body.gif
 export const getAsset = async (pathAsset) => {
   const activeTheme = await getActiveTheme();
-  const urlAsset = `${getUrl()}/themes/${
-    activeTheme.id
-  }/assets.json?asset[key]=${pathAsset}`;
+  const urlAsset = `/themes/${activeTheme.id}/assets.json?asset[key]=${pathAsset}`;
   //console.log('activeTheme', activeTheme, 'url', urlAsset);
 
   let asset = null;
   try {
-    const result = await axios.get(urlAsset);
+    const result = await get(urlAsset);
     if (result) {
       asset = result.data;
     }
@@ -106,7 +104,7 @@ export const setAsset = async (path, value) => {
 
   let success = true;
   try {
-    await axios.put(`${getUrl()}/themes/${activeTheme.id}/assets.json`, {
+    await put(`/themes/${activeTheme.id}/assets.json`, {
       asset: {
         key: path,
         value: value,
@@ -126,8 +124,8 @@ export const deleteAsset = async (path) => {
 
   let success = true;
   try {
-    await axios.delete(
-      `${getUrl()}/themes/${activeTheme.id}/assets.json?asset[key]=${path}`
+    await del(
+      `/themes/${activeTheme.id}/assets.json?asset[key]=${path}`
     );
   } catch (e) {
     console.log("error", e);
@@ -286,7 +284,7 @@ export const duplicateAsset = async (
 
 // /admin/api/2020-07/pages/{page_id}.json
 export const getPage = async (pageId) => {
-  const result = await axios.get(`${getUrl()}/pages/${pageId}.json`);
+  const result = await get(`/pages/${pageId}.json`);
 
   return result;
 };

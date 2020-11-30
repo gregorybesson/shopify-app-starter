@@ -30,9 +30,33 @@ export const get = async (query) => {
   });
 };
 
-export const getUrl2 = () => {
-  console.log("settings", settings);
+export const put = async (query, payload) => {
+  return axios.put(
+    `${getUrl2()}${query}`,
+    payload,
+    {
+      headers: getHeaders(),
+    }
+  );
+};
 
+export const post = async (query, payload) => {
+  return axios.post(
+    `${getUrl2()}${query}`,
+    payload,
+    {
+      headers: getHeaders(),
+    }
+  );
+};
+
+export const del = async (query) => {
+  return axios.delete(`${getUrl2()}${query}`, {
+    headers: getHeaders(),
+  });
+};
+
+export const getUrl2 = () => {
   if (
     !settings ||
     !settings.shopName ||
@@ -58,8 +82,6 @@ export const getUrl = (activeShop = null, accessToken = null) => {
 
 export const getHeaders = () => {
   if (settings && settings.shopName && settings.accessToken) {
-    console.log('"X-Shopify-Access-Token"', settings.accessToken);
-
     return { "X-Shopify-Access-Token": settings.accessToken };
   }
 

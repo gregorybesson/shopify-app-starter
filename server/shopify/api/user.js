@@ -2,7 +2,7 @@ import axios from "axios";
 import dotenv from "dotenv";
 import _ from "lodash";
 
-import { getUrl, get } from "../query";
+import { get, put, post, del, getUrl } from "../query";
 
 dotenv.config();
 
@@ -18,19 +18,19 @@ dotenv.config();
 */
 
 export const getUsers = async () => {
-  const result = await axios.get(`${getUrl()}/users.json`);
+  const result = await get(`/users.json`);
 
   return result.data.users;
 };
 
 export const getUser = async (userId) => {
-  const result = await axios.get(`${getUrl()}/users/${userId}.json`);
+  const result = await get(`/users/${userId}.json`);
 
   return result.data.user;
 };
 
 export const getCurrentUser = async () => {
-  //const result = await axios.get(`${getUrl()}/users/current.json`);
+  //const result = await get(`/users/current.json`);
   const result = await get(`/users/current.json`);
 
   return result.data.user;

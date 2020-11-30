@@ -2,7 +2,7 @@ import axios from "axios";
 import dotenv from "dotenv";
 import _ from "lodash";
 
-import { getUrl } from "../query";
+import { get, put, post, del, getUrl } from "../query";
 
 dotenv.config();
 
@@ -30,13 +30,13 @@ dotenv.config();
 */
 
 export const getGiftCards = async () => {
-  const result = await axios.get(`${getUrl()}/gift_cards.json`);
+  const result = await get(`/gift_cards.json`);
 
   return result.data.gift_cards;
 };
 
 export const getGiftCard = async (giftCardId) => {
-  const result = await axios.get(`${getUrl()}/gift_cards/${giftCardId}.json`);
+  const result = await get(`/gift_cards/${giftCardId}.json`);
 
   return result.data.gift_card;
 };
@@ -52,7 +52,7 @@ export const createGiftCard = async (changeset) => {
   console.log("changeset createGiftCard", changeset);
 
   try {
-    const req = await axios.post(`${getUrl()}/gift_cards.json`, {
+    const req = await post(`/gift_cards.json`, {
       gift_card: changeset,
     });
     result = req.data;
@@ -73,8 +73,8 @@ export const updateGiftCard = async (giftCardId, changeset) => {
       ...changeset,
     },
   };
-  const result = await axios.put(
-    `${getUrl()}/gift_cards/${giftCardId}.json`,
+  const result = await put(
+    `/gift_cards/${giftCardId}.json`,
     changeset
   );
 
@@ -84,8 +84,8 @@ export const updateGiftCard = async (giftCardId, changeset) => {
 export const disableGiftCard = async (giftCardId) => {
   let result = null;
   try {
-    const req = await axios.post(
-      `${getUrl()}/gift_cards/${giftCardId}/disable.json`
+    const req = await post(
+      `/gift_cards/${giftCardId}/disable.json`
     );
 
     result = req.data;

@@ -1,7 +1,7 @@
 import axios from "axios";
 import dotenv from "dotenv";
 import _ from "lodash";
-import { getUrl } from "../query";
+import { get, put, post, del, getUrl } from "../query";
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 dotenv.config();
@@ -43,7 +43,7 @@ export const getFulfillmentServices = async () => {
 
   let result = null;
   try {
-    const req = await axios.post(`${getUrl()}/graphql.json`, query);
+    const req = await post(`/graphql.json`, query);
 
     result = req.data.data.shop.fulfillmentServices;
   } catch (e) {
@@ -58,14 +58,14 @@ export const getFulfillmentServices = async () => {
 
 //This query may result in a bug as Shopify may not return all the fulfillment services in some cases...
 // export const getFulfillmentServices = async () => {
-//   const result = await axios.get(`${getUrl()}/fulfillment_services.json`);
+//   const result = await get(`/fulfillment_services.json`);
 
 //   return result.data.fulfillment_services;
 // };
 
 export const getFulfillmentService = async (fulfillment_service_id) => {
-  const result = await axios.get(
-    `${getUrl()}/fulfillment_services/${fulfillment_service_id}.json`
+  const result = await get(
+    `/fulfillment_services/${fulfillment_service_id}.json`
   );
 
   return result.data.fulfillment_service;
@@ -109,7 +109,7 @@ export const createFulfillmentServiceQL = async (changeset) => {
 
   let result = null;
   try {
-    const req = await axios.post(`${getUrl()}/graphql.json`, query);
+    const req = await post(`/graphql.json`, query);
     console.log("req", req.data.data.fulfillmentServiceCreate.userErrors);
   } catch (e) {
     console.log(
@@ -132,7 +132,7 @@ export const createFulfillmentService = async (changeset) => {
   // }
   let result = null;
   try {
-    const req = await axios.post(`${getUrl()}/fulfillment_services.json`, {
+    const req = await post(`/fulfillment_services.json`, {
       fulfillment_service: changeset,
     });
 
@@ -148,8 +148,8 @@ export const createFulfillmentService = async (changeset) => {
 };
 
 export const updateFulfillmentService = async (fulfillment_service_id) => {
-  const result = await axios.put(
-    `${getUrl()}/fulfillment_services/${fulfillment_service_id}.json`,
+  const result = await put(
+    `/fulfillment_services/${fulfillment_service_id}.json`,
     {
       fulfillment_service: {
         id: fulfillment_service_id,
@@ -163,8 +163,8 @@ export const updateFulfillmentService = async (fulfillment_service_id) => {
 };
 
 export const deleteFulfillmentService = async (fulfillment_service_id) => {
-  const result = await axios.delete(
-    `${getUrl()}/fulfillment_services/${fulfillment_service_id}.json`
+  const result = await del(
+    `/fulfillment_services/${fulfillment_service_id}.json`
   );
 
   return result.data;

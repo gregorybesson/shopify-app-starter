@@ -2,7 +2,7 @@ import axios from "axios";
 import dotenv from "dotenv";
 import _ from "lodash";
 import Bottleneck from "bottleneck";
-import { getUrl, getNextPage } from "../query";
+import { get, put, post, del, getUrl, getNextPage } from "../query";
 
 dotenv.config();
 
@@ -29,19 +29,19 @@ const { SHOP, ACCESS_TOKEN } = process.env;
  */
 
 export const getCustomCollections = async () => {
-  const result = await axios.get(`${getUrl()}/custom_collections.json`);
+  const result = await get(`/custom_collections.json`);
 
   return result.data.custom_collections;
 };
 
 export const getCustomCollection = async (id) => {
-  const result = await axios.get(`${getUrl()}/custom_collections/${id}.json`);
+  const result = await get(`/custom_collections/${id}.json`);
 
   return result.data.custom_collection;
 };
 
 export const createCustomCollection = async (changeset) => {
-  const result = await axios.post(`${getUrl()}/custom_collections.json`, {
+  const result = await post(`/custom_collections.json`, {
     custom_collection: changeset,
   });
 
@@ -53,7 +53,7 @@ export const updateCustomCollection = async (id, changeset) => {
     id: id,
     ...changeset,
   };
-  const result = await axios.put(`${getUrl()}/custom_collections/${id}.json`, {
+  const result = await put(`/custom_collections/${id}.json`, {
     custom_collection: changeset,
   });
 
@@ -63,8 +63,8 @@ export const updateCustomCollection = async (id, changeset) => {
 };
 
 export const deleteCustomCollection = async (id) => {
-  const result = await axios.delete(
-    `${getUrl()}/custom_collections/${id}.json`
+  const result = await del(
+    `/custom_collections/${id}.json`
   );
 
   return result.data;

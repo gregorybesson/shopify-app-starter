@@ -346,13 +346,10 @@ shopifyRouter.get("/get-order", koaBody(), async (ctx) => {
   let id = ctx.query["id"];
   const result = await shopify.getOrder(id);
   const orderMetafields = await shopify.getOrderMetafields(id);
-  console.log("orderMetafields", orderMetafields);
   const found = _.get(orderMetafields, "key") === "fastmag-order-id";
   const fastmagMeta = _.find(orderMetafields, ["key", "fastmag-order-id"]);
-  console.log("found", found);
   result["fastmagId"] = _.get(fastmagMeta, "value", "");
 
-  console.log("order", result);
   ctx.body = {
     status: "success",
     result: result,

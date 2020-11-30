@@ -2,7 +2,7 @@ import axios from "axios";
 import dotenv from "dotenv";
 import _ from "lodash";
 import Bottleneck from "bottleneck";
-import { getUrl, getNextPage } from "../query";
+import { get, put, post, del, getUrl, getNextPage } from "../query";
 
 dotenv.config();
 
@@ -17,13 +17,13 @@ const { SHOP, ACCESS_TOKEN } = process.env;
  */
 
 export const getCollection = async (id) => {
-  const result = await axios.get(`${getUrl()}/collections/${id}.json`);
+  const result = await get(`/collections/${id}.json`);
 
   return result.data.collection;
 };
 
 export const getProductsCollection = async (id) => {
-  const result = await axios.get(`${getUrl()}/collections/${id}/products.json`);
+  const result = await get(`/collections/${id}/products.json`);
 
   return result.data.products;
 };
@@ -61,7 +61,7 @@ export const getProductsCollectionByHandle = async (collectionHandle) => {
         }`
       }
 
-      req = await axios.post(`${getUrl()}/graphql.json`, query);
+      req = await post(`/graphql.json`, query);
       const products = req.data.data.collectionByHandle.products.edges;
       cursor =
         products[products.length - 1] &&

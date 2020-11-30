@@ -2,7 +2,7 @@ import axios from "axios";
 import dotenv from "dotenv";
 import _ from "lodash";
 
-import { getUrl } from "../query";
+import { get, put, post, del, getUrl } from "../query";
 import { getFulfillmentServiceByName } from "./fulfillmentService";
 
 dotenv.config();
@@ -22,16 +22,16 @@ dotenv.config();
 */
 
 export const getFulfillmentEvents = async (orderId, fulfillmentId) => {
-  const result = await axios.get(
-    `${getUrl()}/orders/${orderId}/fulfillments/${fulfillmentId}/events.json`
+  const result = await get(
+    `/orders/${orderId}/fulfillments/${fulfillmentId}/events.json`
   );
 
   return result.data.fulfillment_events;
 };
 
 export const getFulfillmentEvent = async (orderId, fulfillmentId, eventId) => {
-  const result = await axios.get(
-    `${getUrl()}/orders/${orderId}/fulfillments/${fulfillmentId}/events/${eventId}.json`
+  const result = await get(
+    `/orders/${orderId}/fulfillments/${fulfillmentId}/events/${eventId}.json`
   );
 
   return result.data.fulfillment_event;
@@ -65,12 +65,12 @@ export const createFulfillmentEvent = async (
   let result = null;
   console.log(
     "fulfillmentevent URL",
-    `${getUrl()}/orders/${orderId}/fulfillments/${fulfillmentId}/events.json`
+    `/orders/${orderId}/fulfillments/${fulfillmentId}/events.json`
   );
 
   try {
-    const req = await axios.post(
-      `${getUrl()}/orders/${orderId}/fulfillments/${fulfillmentId}/events.json`,
+    const req = await post(
+      `/orders/${orderId}/fulfillments/${fulfillmentId}/events.json`,
       {
         event: changeset,
       }
@@ -93,8 +93,8 @@ export const deleteFulfillmentEvent = async (
   fulfillmentId,
   eventId
 ) => {
-  const result = await axios.delete(
-    `${getUrl()}/orders/${orderId}/fulfillments/${fulfillmentId}/events/${eventId}.json`
+  const result = await del(
+    `/orders/${orderId}/fulfillments/${fulfillmentId}/events/${eventId}.json`
   );
 
   return result.data;

@@ -2,7 +2,7 @@ import axios from "axios";
 import dotenv from "dotenv";
 import _ from "lodash";
 
-import { getUrl } from "../query";
+import { get, put, post, del, getUrl } from "../query";
 
 dotenv.config();
 
@@ -25,15 +25,13 @@ dotenv.config();
 */
 
 export const getCarrierServices = async () => {
-  const result = await axios.get(`${getUrl()}/carrier_services.json`);
+  const result = await get(`/carrier_services.json`);
 
   return result.data.carrier_services;
 };
 
 export const getCarrierService = async (carrierServiceId) => {
-  const result = await axios.get(
-    `${getUrl()}/carrier_services/${carrierServiceId}.json`
-  );
+  const result = await get(`/carrier_services/${carrierServiceId}.json`);
 
   return result.data.carrier_service;
 };
@@ -48,7 +46,7 @@ export const createCarrierService = async (changeset) => {
   //console.log("changeset createCarrierService", changeset);
 
   try {
-    const req = await axios.post(`${getUrl()}/carrier_services.json`, {
+    const req = await post(`/carrier_services.json`, {
       carrier_service: changeset,
     });
     result = req.data;
@@ -69,8 +67,8 @@ export const updateCarrierService = async (carrierServiceId, changeset) => {
       ...changeset,
     },
   };
-  const result = await axios.put(
-    `${getUrl()}/carrier_services/${carrierServiceId}.json`,
+  const result = await put(
+    `/carrier_services/${carrierServiceId}.json`,
     changeset
   );
 
@@ -80,8 +78,8 @@ export const updateCarrierService = async (carrierServiceId, changeset) => {
 export const deleteCarrierService = async (carrierServiceId) => {
   let result = null;
   try {
-    const req = await axios.delete(
-      `${getUrl()}/carrier_services/${carrierServiceId}.json`
+    const req = await del(
+      `/carrier_services/${carrierServiceId}.json`
     );
 
     result = req.data;

@@ -2,7 +2,7 @@ import axios from "axios";
 import dotenv from "dotenv";
 import _ from "lodash";
 import Bottleneck from "bottleneck";
-import { getUrl, getNextPage } from "../query";
+import { get, put, post, del, getUrl, getNextPage } from "../query";
 
 dotenv.config();
 
@@ -30,11 +30,11 @@ const { SHOP, ACCESS_TOKEN } = process.env;
  */
 
 export const getProducts = async () => {
-  let nextPage = `${getUrl()}/products.json?limit=250`;
+  let nextPage = `/products.json?limit=250`;
   let arResult = [];
 
   while (nextPage) {
-    const result = await axios.get(nextPage);
+    const result = await get(nextPage);
     arResult = [...arResult, ...result.data.products];
     nextPage = getNextPage(result.headers);
   }
@@ -63,7 +63,7 @@ export const getProductsBySku = async (sku) => {
 
   let result = null;
   try {
-    const req = await axios.post(`${getUrl()}/graphql.json`, query);
+    const req = await post(`/graphql.json`, query);
 
     result = req.data.data.products.edges;
   } catch (e) {
@@ -80,7 +80,7 @@ export const getProduct = async (id) => {
   let result = null;
 
   try {
-    const req = await axios.get(`${getUrl()}/products/${id}.json`);
+    const req = await get(`/products/${id}.json`);
 
     result = req.data.product;
   } catch (e) {
@@ -107,7 +107,7 @@ export const createProduct = async (changeset) => {
   // }
   let result = null;
   try {
-    const req = await axios.post(`${getUrl()}/products.json`, {
+    const req = await post(`/products.json`, {
       product: changeset,
     });
 
@@ -128,7 +128,7 @@ export const updateProduct = async (productId, changeset) => {
   //   "id": "5035807277101",
   //   "tags": "Barnes & Noble, John's Fav"
   // }
-  const result = await axios.put(`${getUrl()}/products/${productId}.json`, {
+  const result = await put(`/products/${productId}.json`, {
     product: changeset,
   });
 
@@ -150,7 +150,7 @@ export const deleteAllProducts = async () => {
 };
 
 export const deleteProduct = async (productId) => {
-  const result = await axios.delete(`${getUrl()}/products/${productId}.json`);
+  const result = await del(`/products/${productId}.json`);
 
   return result.data;
 };

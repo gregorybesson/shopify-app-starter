@@ -2,7 +2,7 @@ import axios from "axios";
 import dotenv from "dotenv";
 import _ from "lodash";
 import Bottleneck from "bottleneck";
-import { getUrl, getNextPage } from "../query";
+import { get, put, post, del, getUrl, getNextPage } from "../query";
 
 dotenv.config();
 
@@ -37,15 +37,15 @@ export const getSmartCollections = async (filter = []) => {
 
   console.log(
     "queryString",
-    `${getUrl()}/smart_collections.json?${queryString}`
+    `/smart_collections.json?${queryString}`
   );
 
-  let nextPage = `${getUrl()}/smart_collections.json?${queryString}`;
+  let nextPage = `/smart_collections.json?${queryString}`;
   let arResult = [];
 
   try {
     while (nextPage) {
-      const result = await axios.get(nextPage);
+      const result = await get(nextPage);
       arResult = [...arResult, ...result.data.smart_collections];
       nextPage = getNextPage(result.headers);
     }
@@ -60,7 +60,7 @@ export const getSmartCollections = async (filter = []) => {
 };
 
 export const getSmartCollection = async (id) => {
-  const result = await axios.get(`${getUrl()}/smart_collections/${id}.json`);
+  const result = await get(`/smart_collections/${id}.json`);
 
   return result.data.smart_collection;
 };
@@ -68,7 +68,7 @@ export const getSmartCollection = async (id) => {
 export const createSmartCollection = async (changeset) => {
   let result = null;
   try {
-    const req = await axios.post(`${getUrl()}/smart_collections.json`, {
+    const req = await post(`/smart_collections.json`, {
       smart_collection: changeset,
     });
     result = req.data.smart_collection;
@@ -87,7 +87,7 @@ export const updateSmartCollection = async (id, changeset) => {
     id: id,
     ...changeset,
   };
-  const result = await axios.put(`${getUrl()}/smart_collections/${id}.json`, {
+  const result = await put(`/smart_collections/${id}.json`, {
     smart_collection: changeset,
   });
 
@@ -101,8 +101,8 @@ export const updateSmartCollectionOrder = async (id, changeset) => {
     id: id,
     ...changeset,
   };
-  const result = await axios.put(
-    `${getUrl()}/smart_collections/${id}/order.json`,
+  const result = await put(
+    `/smart_collections/${id}/order.json`,
     {
       smart_collection: changeset,
     }
@@ -114,7 +114,7 @@ export const updateSmartCollectionOrder = async (id, changeset) => {
 };
 
 export const deleteSmartCollection = async (id) => {
-  const result = await axios.delete(`${getUrl()}/smart_collections/${id}.json`);
+  const result = await del(`/smart_collections/${id}.json`);
 
   return result.data;
 };

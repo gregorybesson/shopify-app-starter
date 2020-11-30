@@ -2,7 +2,7 @@ import axios from "axios";
 import dotenv from "dotenv";
 import _ from "lodash";
 
-import { getUrl } from "../query";
+import { get, put, post, del, getUrl } from "../query";
 
 dotenv.config();
 
@@ -21,7 +21,7 @@ dotenv.config();
  */
 
 export const getLocations = async () => {
-  const result = await axios.get(`${getUrl()}/locations.json`);
+  const result = await get(`/locations.json`);
 
   return result.data;
 };
