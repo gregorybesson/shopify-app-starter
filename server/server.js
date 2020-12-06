@@ -6,7 +6,6 @@ import graphQLProxy, { ApiVersion } from "@shopify/koa-shopify-graphql-proxy";
 import Koa from "koa";
 import next from "next";
 import Router from "koa-router";
-import Cookies from "cookies";
 import session from "koa-session";
 import _ from "lodash";
 import * as handlers from "./handlers/index";
@@ -23,20 +22,27 @@ let cacheProvider = require('./cacheProvider')
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
 dotenv.config();
-const port = parseInt(process.env.PORT, 10) || 8081;
+const port = parseInt(process.env.PORT, 10) || 8082;
 const dev = process.env.NODE_ENV !== "production";
 const app = next({
   dev,
 });
 const handle = app.getRequestHandler();
-const { SHOPIFY_API_SECRET, SHOPIFY_API_KEY, SCOPES, DATABASE } = process.env;
+const { SHOPIFY_API_SECRET, SHOPIFY_API_KEY, SCOPES } = process.env;
 
 async function prepareAuthSession(ctx, next) {
   const { session, query } = ctx;
   const shopQuery =  query["shop"]
   let { shop, accessToken } = session;
+
+  // Si je suis loggé en tant que user et non admin, je prends les droits admin
   if (shop && accessToken) {
-    shopify.setSettings({ shopName: shop, accessToken: accessToken })
+    let serverToken = accessToken
+    const item = await db.getItem({ store: shop, sk: "settings" });
+    if (_.get(item, "Item.accessToken")) {
+      serverToken = _.get(item, "Item.accessToken")
+    }
+    shopify.setSettings({ shopName: shop, accessToken: serverToken })
   } else if (shopQuery) {
     shop = shopQuery
     const isValid = validateSignature(query)
@@ -55,7 +61,7 @@ async function forceOnlineMode(ctx, next) {
   const { shop } = query;
   let forceOnlineMode = false;
 
-  //console.log('session.accessToken', accessToken, shop, ctx.url);
+  // console.log('session.accessToken', accessToken, shop, ctx.url);
   // console.log('ctx.session.associatedUser', ctx.session.associatedUser);
 
   if (ctx.url.includes("/auth/") || ctx.url.endsWith("/auth")) {

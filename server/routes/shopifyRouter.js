@@ -704,10 +704,12 @@ shopifyRouter.get("/filter-products/:collectionHandle", koaBody(), async (ctx) =
   }
 
   let publishedProducts = await services.filterProductsCollectionByHandle(collectionHandle, filters);
+  const total = publishedProducts.length
 
   ctx.body = {
-    status: "success",
-    result: publishedProducts.slice((page - 1) * pageSize, page * pageSize),
+    total: total,
+    nextPage: ((total - (pageSize * page)) > 0),
+    products: publishedProducts.slice((page - 1) * pageSize, page * pageSize),
   };
 });
 
