@@ -157,3 +157,11 @@ export const verifyShopifyHook = (ctx) => {
 
   return safeCompare(digest, hmac);
 };
+
+/**
+ * This function is great to throttle GraphQL calls to Shopify
+ * @param {*} ms
+ */
+export const sleep = (ms) => {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}

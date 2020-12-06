@@ -344,7 +344,9 @@ export const getFullCatalog = async (locationId) => {
         node {
           id,
           title,
+          handle,
           tags,
+          publishedAt,
           onlineStoreUrl,
           description,
           featuredImage {
@@ -372,6 +374,7 @@ export const getFullCatalog = async (locationId) => {
             edges {
               node {
                 id
+                handle
                 title
               }
             }

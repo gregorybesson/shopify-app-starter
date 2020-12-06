@@ -211,7 +211,7 @@ shopifyRouter.get("/get-locations", koaBody(), async (ctx) => {
 //   };
 // });
 
-shopifyRouter.get("/get-products", koaBody(), async (ctx) => {
+shopifyRouter.get("/get-products-by-collection", koaBody(), async (ctx) => {
   const products = await shopify.getProducts();
 
   ctx.body = {
@@ -638,18 +638,11 @@ shopifyRouter.get("/post-smartCollection", koaBody(), async (ctx) => {
 
 shopifyRouter.get("/get-asset", koaBody(), async (ctx) => {
   const result = await shopify.getAsset("config/settings_data.json");
-
   const json = JSON.parse(result.asset.value);
-  const stores = [];
-  for (const section in json.current.sections) {
-    if (section.startsWith("section-storelocator-map")) {
-      stores.push(json.current.sections[section]);
-    }
-  }
 
   ctx.body = {
     status: "success",
-    result: stores,
+    result: json,
   };
 });
 
@@ -690,27 +683,113 @@ shopifyRouter.get("/get-carrierServices", koaBody(), async (ctx) => {
   };
 });
 
-// /filter-products/accessoires?tag_color=color_NOIR%2Bcolor_BORDEAUX&page=1&pagination=2&tag_size=size_44/45
-shopifyRouter.get("/filter-products/:collectionHandle", koaBody(), async (ctx) => {
-  const collectionHandle = ctx.params.collectionHandle;
-  const filters = []
-  let pageSize = ctx.query["pagination"] ?? 30
-  let page = ctx.query["page"] ?? 1;
-  for (const key in ctx.query) {
-    if (key.startsWith('tag_')) {
-      const tagValues = ctx.query[key].split('+')
-      filters.push(tagValues)
-    }
-  }
+shopifyRouter.get("/get-full-catalog-cache", koaBody(), async (ctx) => {
+  const shopifyInventory = await services.getFullCatalog();
 
-  let publishedProducts = await services.filterProductsCollectionByHandle(collectionHandle, filters);
-  const total = publishedProducts.length
-
-  ctx.body = {
-    total: total,
-    nextPage: ((total - (pageSize * page)) > 0),
-    products: publishedProducts.slice((page - 1) * pageSize, page * pageSize),
-  };
+  ctx.body = {shopifyInventory};
 });
+
+/**
+ * Filtre de produits dans une collection
+ * On peut filtrer sur les tags
+ *
+ * On peut trier sur TITLE, PRICE, BEST_SELLING, CREATED, COLLECTION_DEFAULT dans une collection GQL
+ * ici on va chercher par défaut les produits de la collection triés par BEST_SELLING et on fait les tris si besoin
+ * par un autre critère en js. Pas top en perf mais permet d'avoir le tri par BEST_SELLING. TODO: Les collections de produits triés
+ * devraient être mis en cache tous.
+ *
+ * On peut paginer avec page (numéro de page) et pagination (nombre d'éléments pas page)
+ *
+ * ex. filter-products/accessoires?tag_color=color_NOIR%2Bcolor_BORDEAUX&page=1&pagination=2&tag_size=size_44/45&sort=title&order=asc
+ */
+shopifyRouter.get(
+  "/filter-products/:collectionHandle",
+  koaBody(),
+  async (ctx) => {
+    const sortKeys = {
+      "date": "CREATED",
+      "price": "PRICE",
+      "best_selling": "BEST_SELLING",
+      "title": "TITLE"
+    }
+    const clearCache = (ctx.query["clear-cache"] && ctx.query["clear-cache"] === 'true') ?? false;
+    const collectionHandle = ctx.params.collectionHandle;
+    const filters = [];
+    const subCollections = [];
+    const pageSize = ctx.query["pagination"] ?? 30;
+    const page = ctx.query["page"] ?? 1;
+    const sortKey = (ctx.query["sort"] && sortKeys[ctx.query["sort"]]) ? sortKeys[ctx.query["sort"]] : sortKeys['date'];
+    const order = (ctx.query["order"] && ctx.query["order"] === "asc") ? 'asc' : 'desc';
+    for (const key in ctx.query) {
+      if (key.startsWith("tag_")) {
+        const tagValues = ctx.query[key].split("+");
+        filters.push({ type: "tag", values: tagValues });
+      }
+      if (key.startsWith("coll_")) {
+        const subCollectionValues = ctx.query[key].split("+");
+        filters.push({ type: "collection", values: subCollectionValues });
+      }
+    }
+
+    let publishedProducts = await services.filterProductsCollectionByHandle(
+      collectionHandle,
+      filters,
+      sortKey,
+      clearCache
+    );
+    if (order === 'desc') {
+      publishedProducts = publishedProducts.reverse()
+    }
+    const total = publishedProducts.length
+
+    ctx.body = {
+      total: total,
+      nextPage: ((total - (pageSize * page)) > 0),
+      products: publishedProducts.slice((page - 1) * pageSize, page * pageSize),
+    };
+  }
+);
+
+/**
+ * TODO: This function is used this way : publishedProducts.sort(compareValues(sort, order));
+ * We're sorting through Shopify's GraphQL for now but we could improve the efficiency by using a
+ * full JS sort function...
+ * Sort based on string or number
+ * @param {*} key
+ * @param {*} order
+ */
+const compareValues = (key, order = 'desc') => {
+  return function innerSort(a, b) {
+
+    let aval = _.get(a, key)
+    let bval = _.get(b, key)
+
+    if (!aval || !bval) {
+      // property doesn't exist on either object
+      return 0;
+    }
+
+    // If I sort on price
+    if (key === "variants.edges[0].node.price") {
+      aval = +aval
+      bval = +bval
+    }
+
+    const varA = (typeof aval === 'string')
+      ? aval.toUpperCase() : aval;
+    const varB = (typeof bval === 'string')
+      ? bval.toUpperCase() : bval;
+
+    let comparison = 0;
+    if (varA > varB) {
+      comparison = 1;
+    } else if (varA < varB) {
+      comparison = -1;
+    }
+    return (
+      (order === 'desc') ? (comparison * -1) : comparison
+    );
+  };
+}
 
 export default shopifyRouter;
