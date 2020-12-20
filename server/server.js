@@ -73,8 +73,10 @@ async function forceOnlineMode(ctx, next) {
       //console.log('force online mode');
       forceOnlineMode = true;
     }
-  } else {
-    forceOnlineMode = false;
+  } else if (typeof ctx.session.associatedUser === 'undefined') {
+    ctx.redirect(`/auth/inline?shop=${shop}`);
+
+    return;
   }
 
   await next();
