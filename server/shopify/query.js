@@ -165,3 +165,14 @@ export const verifyShopifyHook = (ctx) => {
 export const sleep = (ms) => {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
+
+export const setSettingsFromShop = async (shop) => {
+  const item = await db.getItem({ store: shop, sk: "settings" });
+  if (_.get(item, "Item.accessToken")) {
+    setSettings({ shopName: shop, accessToken: _.get(item, "Item.accessToken") })
+
+    return true
+  }
+
+  return false
+}

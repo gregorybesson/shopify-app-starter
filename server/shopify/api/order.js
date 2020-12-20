@@ -76,6 +76,7 @@ export const getAllOrdersGQL = async (filter = "") => {
                   id
                   address1
                   address2
+                  zip
                   city
                 }
                 customer {

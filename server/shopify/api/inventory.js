@@ -435,6 +435,47 @@ export const getFullCatalog = async (locationId) => {
   return inventory;
 };
 
+export const getProductByTag = async (tag) => {
+  let inventory = [];
+  let req = null;
+
+  try {
+    //console.log('cursor', cursor);
+    const query = {
+      query: `{
+        products(first:1, query:"tag:${tag}"){
+          edges {
+            cursor
+            node {
+              id,
+              legacyResourceId,
+              title,
+              tags,
+              onlineStoreUrl,
+              description,
+              featuredImage {
+                originalSrc
+              },
+              totalInventory,
+            }
+          }
+        }
+      }`,
+    };
+    req = await post(`/graphql.json`, query);
+    //console.log('response', req.data);
+
+    inventory = req.data.data.products.edges;
+  } catch (e) {
+    console.log(
+      "getProductByTag error :",
+      _.get(e, "response.data.errors", _.get(e, "response.data.error", e))
+    );
+  }
+
+  return inventory;
+};
+
 export const getProductsByTag = async (tag) => {
   const inventory = [];
   let req = null;
