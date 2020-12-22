@@ -30,12 +30,23 @@ const app = next({
 const handle = app.getRequestHandler();
 const { SHOPIFY_API_SECRET, SHOPIFY_API_KEY, SCOPES } = process.env;
 
+/**
+ * If logged in with online token flow, I prepare the Shopify API
+ * with the permanent accesstoken.
+ * If not logged in but through a Shopify proxy, I prepare also the Shopify API
+ * with the permanent accesstoken
+ *
+ * TODO : Find a way to protect the whole app even from CRON
+ * For now, I let anyone enter if there is "shop" in the query...
+ * @param {*} ctx
+ * @param {*} next
+ */
 async function prepareAuthSession(ctx, next) {
   const { session, query } = ctx;
   const shopQuery =  query["shop"]
   let { shop, accessToken } = session;
 
-  // Si je suis loggé en tant que user et non admin, je prends les droits admin
+  // If I'm logged in through the online flow, I set the offline token to Shopify API
   if (shop && accessToken) {
     let serverToken = accessToken
     const item = await db.getItem({ store: shop, sk: "settings" });
@@ -46,6 +57,8 @@ async function prepareAuthSession(ctx, next) {
   } else if (shopQuery) {
     shop = shopQuery
     const isValid = validateSignature(query)
+    console.log('is Sopify signature valid for', ctx.url, ':', isValid);
+
     const item = await db.getItem({ store: shop, sk: "settings" });
     if (_.get(item, "Item.accessToken")) {
       shopify.setSettings({ shopName: shop, accessToken: _.get(item, "Item.accessToken") })
@@ -55,25 +68,26 @@ async function prepareAuthSession(ctx, next) {
   await next();
 }
 
+/**
+ * If there is no permanent token in the db, I use the offline token flow
+ * else I use the online token flow
+ * + During the first install, just after the offline flow, I redirect the user
+ * once again to /auth to trigger the online flow
+ * @param {*} ctx
+ * @param {*} next
+ */
 async function forceOnlineMode(ctx, next) {
   const { session, query } = ctx;
-  const { accessToken } = session;
-  const { shop } = query;
+  const shopQuery =  query["shop"]
+  const { shop, accessToken, associatedUser } = session;
   let forceOnlineMode = false;
 
-  // console.log('session.accessToken', accessToken, shop, ctx.url);
-  // console.log('ctx.session.associatedUser', ctx.session.associatedUser);
-
   if (ctx.url.includes("/auth/") || ctx.url.endsWith("/auth")) {
-    //console.log('on va check la bdd');
-    const item = await db.getItem({ store: shop, sk: "settings" });
-    //console.log('item', item);
+    const item = await db.getItem({ store: shopQuery, sk: "settings" });
     if (_.get(item, "Item.accessToken")) {
-      // I have already the offline accessToken, I need now to know whose connected
-      //console.log('force online mode');
       forceOnlineMode = true;
     }
-  } else if (typeof ctx.session.associatedUser === 'undefined') {
+  } else if (!ctx.url.startsWith("/_next/") && shop && accessToken && !associatedUser) {
     ctx.redirect(`/auth/inline?shop=${shop}`);
 
     return;
@@ -85,8 +99,6 @@ async function forceOnlineMode(ctx, next) {
     forceOnlineMode &&
     ctx.response.get("location").includes("oauth/authorize")
   ) {
-    //console.log('location', ctx.response.get('location'));
-
     ctx.response.set(
       "location",
       `${ctx.response.get("location")}&grant_options[]=per-user`
@@ -103,25 +115,6 @@ app.prepare().then(() => {
   const server = new Koa();
   server.proxy = true;
   const router = new Router();
-  // FIX : DOES NOT WORK The redirect loop with chrome incognito or Safari
-  // server.use((ctx, next) => {
-  //   const cookies = new Cookies(ctx.req, ctx.res, {
-  //     keys: server.keys,
-  //     secure: true,
-  //   });
-
-  //   const originalCookieSet = cookies.set.bind(cookies);
-
-  //   const patched = function set(name, value, opts) {
-  //     const patch = { sameSite: 'none' };
-  //     const patchedOpts = opts ? { ...opts, ...patch } : patch;
-  //     return originalCookieSet(name, value, patchedOpts);
-  //   };
-
-  //   cookies.set = patched.bind(cookies);
-  //   ctx.cookies = cookies;
-  //   return next();
-  // });
 
   server.use(cors());
   server.use(
@@ -171,17 +164,6 @@ app.prepare().then(() => {
 
           await db.updateItem(key, changeset);
         }
-        // else if (item.Item.accessToken !== accessToken) {
-        //   const key = { store: shop, sk: "settings" };
-
-        //   var changeset = {
-        //     UpdateExpression: "set #token = :x",
-        //     ExpressionAttributeNames: { "#token": "accessToken" },
-        //     ExpressionAttributeValues: { ":x": accessToken },
-        //   };
-
-        //   await db.updateItem(key, changeset);
-        // }
 
         ctx.cookies.set("shopOrigin", shop, {
           httpOnly: false,
@@ -189,16 +171,15 @@ app.prepare().then(() => {
           sameSite: "none",
         });
 
-        //console.log('ctx.session', ctx.session);
-
-        ctx.cookies.set("user", JSON.stringify(ctx.session.associatedUser), {
-          httpOnly: false,
-          secure: true,
-          sameSite: "none",
-        });
-
         if (registerOffline) {
           webhooks.create(ctx.hostname, accessToken, shop);
+        } else {
+          ctx.cookies.set("user", JSON.stringify(ctx.session.associatedUser), {
+            httpOnly: false,
+            secure: true,
+            sameSite: "none",
+          });
+          console.log('user', ctx.session.associatedUser);
         }
 
         ctx.redirect("/");

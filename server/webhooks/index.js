@@ -9,7 +9,7 @@ export const create = async (hostname, accessToken, shop) => {
   const apiVersion = "2020-07";
   const webhooks = [WEBHOOKS]
 
-  if (webhooks["ORDERS_CREATE"]) {
+  if (webhooks.includes("ORDERS_CREATE")) {
     const registration = await registerWebhook({
       address: `https://${hostname}/app/webhook/orders/create`,
       topic: "ORDERS_CREATE",
@@ -27,7 +27,7 @@ export const create = async (hostname, accessToken, shop) => {
       );
     }
   }
-  if (webhooks["CUSTOMERS_CREATE"]) {
+  if (webhooks.includes("CUSTOMERS_CREATE")) {
     const customerCreate = await registerWebhook({
       address: `https://${hostname}/app/webhook/customers/create`,
       topic: "CUSTOMERS_CREATE",
@@ -46,7 +46,7 @@ export const create = async (hostname, accessToken, shop) => {
     }
   }
 
-  if (webhooks["CUSTOMERS_UPDATE"]) {
+  if (webhooks.includes("CUSTOMERS_UPDATE")) {
     const customerUpdate = await registerWebhook({
       address: `https://${hostname}/app/webhook/customers/update`,
       topic: "CUSTOMERS_UPDATE",
@@ -65,7 +65,7 @@ export const create = async (hostname, accessToken, shop) => {
     }
   }
 
-  if (webhooks["REFUNDS_CREATE"]) {
+  if (webhooks.includes("REFUNDS_CREATE")) {
     const refundsCreate = await registerWebhook({
       address: `https://${hostname}/app/webhook/refunds/create`,
       topic: "REFUNDS_CREATE",
@@ -83,8 +83,12 @@ export const create = async (hostname, accessToken, shop) => {
       );
     }
   }
+  console.log('webhooks', webhooks);
+  console.log('webhooks["APP_UNINSTALLED"]', webhooks["APP_UNINSTALLED"]);
 
-  if (webhooks["APP_UNINSTALLED"]) {
+  if (webhooks.includes("APP_UNINSTALLED")) {
+    console.log('webhooks APP_UNINSTALLED called');
+
     const uninstallRegistration = await registerWebhook({
       address: `https://${hostname}/app/webhook/app/uninstalled`,
       topic: "APP_UNINSTALLED",
