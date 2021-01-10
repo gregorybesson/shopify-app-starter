@@ -334,15 +334,18 @@ export const updateInventoryBulk = async (chunkInventory) => {
  * Get the full catalog of variants for published products on the web channel
  * @param {*} locationId
  */
-export const getFullCatalog = async (locationId) => {
+export const getFullCatalog = async (locationId, published = true) => {
   //console.log('locationId', locationId)
   const gidLocation = `gid://shopify/Location/${locationId}`;
   const inventory = [];
+  const queryStr = published ? 'published_status:published' : 'published_status:unpublished'
   const query = `{
-    products(query:"published_status:published") {
+    products(query:"${queryStr}") {
       edges {
         node {
           id,
+          legacyResourceId,
+          status,
           title,
           handle,
           tags,
@@ -352,6 +355,9 @@ export const getFullCatalog = async (locationId) => {
           featuredImage {
             originalSrc
           },
+          composition: metafield(namespace: "custom_fields", key: "composition") {
+            value
+          }
           totalInventory,
           variants(first:12) {
             edges {

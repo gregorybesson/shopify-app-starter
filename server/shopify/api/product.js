@@ -124,10 +124,10 @@ export const createProduct = async (changeset) => {
 };
 
 export const updateProduct = async (productId, changeset) => {
-  // changeset = {
-  //   "id": "5035807277101",
-  //   "tags": "Barnes & Noble, John's Fav"
-  // }
+  changeset = {
+    id: Number(productId),
+    ...changeset,
+  };
   const result = await put(`/products/${productId}.json`, {
     product: changeset,
   });
@@ -153,4 +153,39 @@ export const deleteProduct = async (productId) => {
   const result = await del(`/products/${productId}.json`);
 
   return result.data;
+};
+
+export const getProductMetafields = async (id) => {
+  let result = [];
+  try {
+    const req = await get(`/products/${id}/metafields.json`);
+    result = req.data.metafields;
+  } catch (e) {
+    // console.log(
+    //   "getCustomerMetafields error :",
+    //   _.get(e, "response.data.errors", _.get(e, "response.data.error", e))
+    // );
+  }
+
+  return result;
+};
+
+export const getProductMetafield = async (id, namespace, key) => {
+  let result = {};
+  try {
+    const req = await get(`/products/${id}/metafields.json`);
+    const metafields = req.data.metafields;
+    metafields.map(metafield => {
+      if (metafield.namespace === namespace && metafield.key === key) {
+        result = metafield
+      }
+    })
+  } catch (e) {
+    // console.log(
+    //   "getCustomerMetafields error :",
+    //   _.get(e, "response.data.errors", _.get(e, "response.data.error", e))
+    // );
+  }
+
+  return result;
 };

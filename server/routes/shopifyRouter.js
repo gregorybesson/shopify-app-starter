@@ -220,8 +220,29 @@ shopifyRouter.get("/get-products-by-collection", koaBody(), async (ctx) => {
   };
 });
 
-shopifyRouter.get("/get-product-variants", koaBody(), async (ctx) => {
-  const productId = 5073666015277;
+/**
+ * TODO: service Shopify
+ */
+shopifyRouter.get(
+  "/get-products-by-tag-starting-with/:tag",
+  koaBody(),
+  async (ctx) => {
+    const tag = ctx.params.tag;
+    let shopifyInventory = [];
+    if (tag) {
+      shopifyInventory = await shopify.getProductsByTagStartingWith(tag);
+    }
+
+    ctx.body = {
+      status: "success",
+      qty: shopifyInventory.length,
+      result: shopifyInventory,
+    };
+  }
+);
+
+shopifyRouter.get("/get-product-variants/:id", koaBody(), async (ctx) => {
+  const productId = ctx.params.id;
   const get = await shopify.getProductVariants(productId);
 
   ctx.body = {
@@ -229,6 +250,32 @@ shopifyRouter.get("/get-product-variants", koaBody(), async (ctx) => {
     result: get,
   };
 });
+
+shopifyRouter.get("/get-product-metafields/:id", koaBody(), async (ctx) => {
+  const productId = ctx.params.id;
+  const get = await shopify.getProductMetafields(productId);
+
+  ctx.body = {
+    status: "success",
+    result: get,
+  };
+});
+
+shopifyRouter.get(
+  "/get-product-metafield/:id/:namespace/:key",
+  koaBody(),
+  async (ctx) => {
+    const productId = ctx.params.id;
+    const namespace = ctx.params.namespace;
+    const key = ctx.params.key;
+    const get = await shopify.getProductMetafield(productId, namespace, key);
+
+    ctx.body = {
+      status: "success",
+      result: get,
+    };
+  }
+);
 
 shopifyRouter.get("/get-variant", koaBody(), async (ctx) => {
   const variantId = 5073665884205;
@@ -346,10 +393,12 @@ shopifyRouter.get("/get-order", koaBody(), async (ctx) => {
   let id = ctx.query["id"];
   const result = await shopify.getOrder(id);
   const orderMetafields = await shopify.getOrderMetafields(id);
-  const found = _.get(orderMetafields, "key") === "fastmag-order-id";
+  //console.log("orderMetafields", orderMetafields);
   const fastmagMeta = _.find(orderMetafields, ["key", "fastmag-order-id"]);
+  //console.log("fastmagMeta", fastmagMeta);
   result["fastmagId"] = _.get(fastmagMeta, "value", "");
 
+  //console.log("order", result);
   ctx.body = {
     status: "success",
     result: result,
@@ -686,7 +735,7 @@ shopifyRouter.get("/get-carrierServices", koaBody(), async (ctx) => {
 shopifyRouter.get("/get-full-catalog-cache", koaBody(), async (ctx) => {
   const shopifyInventory = await services.getFullCatalog();
 
-  ctx.body = {shopifyInventory};
+  ctx.body = { shopifyInventory };
 });
 
 /**
@@ -707,19 +756,24 @@ shopifyRouter.get(
   koaBody(),
   async (ctx) => {
     const sortKeys = {
-      "date": "CREATED",
-      "price": "PRICE",
-      "best_selling": "BEST_SELLING",
-      "title": "TITLE"
-    }
-    const clearCache = (ctx.query["clear-cache"] && ctx.query["clear-cache"] === 'true') ?? false;
+      date: "CREATED",
+      price: "PRICE",
+      best_selling: "BEST_SELLING",
+      title: "TITLE",
+    };
+    const clearCache =
+      (ctx.query["clear-cache"] && ctx.query["clear-cache"] === "true") ??
+      false;
     const collectionHandle = ctx.params.collectionHandle;
     const filters = [];
-    const subCollections = [];
     const pageSize = ctx.query["pagination"] ?? 30;
     const page = ctx.query["page"] ?? 1;
-    const sortKey = (ctx.query["sort"] && sortKeys[ctx.query["sort"]]) ? sortKeys[ctx.query["sort"]] : sortKeys['date'];
-    const order = (ctx.query["order"] && ctx.query["order"] === "asc") ? 'asc' : 'desc';
+    const sortKey =
+      ctx.query["sort"] && sortKeys[ctx.query["sort"]]
+        ? sortKeys[ctx.query["sort"]]
+        : sortKeys["date"];
+    const order =
+      ctx.query["order"] && ctx.query["order"] === "asc" ? "asc" : "desc";
     for (const key in ctx.query) {
       if (key.startsWith("tag_")) {
         const tagValues = ctx.query[key].split("+");
@@ -737,14 +791,14 @@ shopifyRouter.get(
       sortKey,
       clearCache
     );
-    if (order === 'desc') {
-      publishedProducts = publishedProducts.reverse()
+    if (order === "desc") {
+      publishedProducts = publishedProducts.reverse();
     }
-    const total = publishedProducts.length
+    const total = publishedProducts.length;
 
     ctx.body = {
       total: total,
-      nextPage: ((total - (pageSize * page)) > 0),
+      nextPage: total - pageSize * page > 0,
       products: publishedProducts.slice((page - 1) * pageSize, page * pageSize),
     };
   }
@@ -758,11 +812,10 @@ shopifyRouter.get(
  * @param {*} key
  * @param {*} order
  */
-const compareValues = (key, order = 'desc') => {
+const compareValues = (key, order = "desc") => {
   return function innerSort(a, b) {
-
-    let aval = _.get(a, key)
-    let bval = _.get(b, key)
+    let aval = _.get(a, key);
+    let bval = _.get(b, key);
 
     if (!aval || !bval) {
       // property doesn't exist on either object
@@ -771,14 +824,12 @@ const compareValues = (key, order = 'desc') => {
 
     // If I sort on price
     if (key === "variants.edges[0].node.price") {
-      aval = +aval
-      bval = +bval
+      aval = +aval;
+      bval = +bval;
     }
 
-    const varA = (typeof aval === 'string')
-      ? aval.toUpperCase() : aval;
-    const varB = (typeof bval === 'string')
-      ? bval.toUpperCase() : bval;
+    const varA = typeof aval === "string" ? aval.toUpperCase() : aval;
+    const varB = typeof bval === "string" ? bval.toUpperCase() : bval;
 
     let comparison = 0;
     if (varA > varB) {
@@ -786,10 +837,8 @@ const compareValues = (key, order = 'desc') => {
     } else if (varA < varB) {
       comparison = -1;
     }
-    return (
-      (order === 'desc') ? (comparison * -1) : comparison
-    );
+    return order === "desc" ? comparison * -1 : comparison;
   };
-}
+};
 
 export default shopifyRouter;

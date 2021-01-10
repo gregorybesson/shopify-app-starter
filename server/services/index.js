@@ -55,7 +55,10 @@ export const filterProductsCollectionByHandle = async (
         filter.values.map((value) => {
           if (filter.type === "tag" && product.tags.includes(value)) {
             resultOR = true;
-          } else if (filter.type === "collection" && product.productType.toLowerCase() === value.toLowerCase()) {
+          } else if (
+            filter.type === "collection" &&
+            product.productType.toLowerCase() === value.toLowerCase()
+          ) {
             resultOR = true;
           }
         });
@@ -82,8 +85,11 @@ export const filterProductsCollectionByHandle = async (
  *  MANUAL
  *  COLLECTION_DEFAULT
  */
-export const getCachedProductsCollectionByHandle = async (collectionHandle, sortKey = 'BEST_SELLING', clearCache = false) => {
-
+export const getCachedProductsCollectionByHandle = async (
+  collectionHandle,
+  sortKey = "BEST_SELLING",
+  clearCache = false
+) => {
   // 24h
   const CACHE_DURATION = 24 * 3600;
   const CACHE_KEY = `COLLECTION_${collectionHandle}_${sortKey}`;
@@ -112,31 +118,43 @@ export const getCachedProductsCollectionByHandle = async (collectionHandle, sort
 export const getFullCatalog = async (clearCache = false) => {
   const CACHE_DURATION = 600;
   const CACHE_KEY = "GRG";
-  var start = new Date()
-  var hrstart = process.hrtime()
-  console.log('cache keys', cacheProvider.instance().keys());
+  var start = new Date();
+  var hrstart = process.hrtime();
+  console.log("cache keys", cacheProvider.instance().keys());
   let publishedProducts = cacheProvider.instance().get(CACHE_KEY);
-  var end = new Date() - start
-  var hrend = process.hrtime(hrstart)
-  console.info('Execution time: %dms', end)
-  console.log('cache stats', cacheProvider.instance().getStats());
+  var end = new Date() - start;
+  var hrend = process.hrtime(hrstart);
+  console.info("Execution time: %dms", end);
+  console.log("cache stats", cacheProvider.instance().getStats());
 
   if (publishedProducts == undefined || clearCache) {
-    console.log('CACHE NON TROUVE', publishedProducts, clearCache)
+    console.log("CACHE NON TROUVE", publishedProducts, clearCache);
     const service = await shopify.getFulfillmentServiceByName("fastmag");
     const locationId = _.get(service, "location_id", null);
     const shopifyInventory = await shopify.getFullCatalog(locationId);
     const productsJsonl = parseJsonlProducts(shopifyInventory);
     publishedProducts = Object.values(productsJsonl);
     cacheProvider.instance().set(CACHE_KEY, publishedProducts, CACHE_DURATION);
-    console.log('CACHE FULL PRODUCTS', 'DOOOOOOOOOOONE');
-  } else {
-    console.log('CACHE TROUVE !!!', 'DOOOOOOOOOOONE');
   }
 
   return true;
 };
 
+export const getFullCatalogTree = async (fulfillmentService, published = true) => {
+  const service = await shopify.getFulfillmentServiceByName(fulfillmentService);
+  const locationId = _.get(service, "location_id", null);
+  const shopifyInventory = await shopify.getFullCatalog(locationId, published);
+  const products = parseJsonlProducts(shopifyInventory);
+
+  return products
+}
+
+/**
+ * We recreate the products tree :
+ * variants and collections are gathered under
+ * their parent product
+ * @param {*} inventory
+ */
 const parseJsonlProducts = (inventory) => {
   const products = {};
 
