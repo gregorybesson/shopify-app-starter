@@ -57,7 +57,7 @@ async function prepareAuthSession(ctx, next) {
   } else if (shopQuery) {
     shop = shopQuery
     const isValid = validateSignature(query)
-    console.log('is Sopify signature valid for', ctx.url, ':', isValid);
+    console.log('is Shopify signature valid for', ctx.url, ':', isValid);
 
     const item = await db.getItem({ store: shop, sk: "settings" });
     if (_.get(item, "Item.accessToken")) {
