@@ -1,6 +1,6 @@
 # Introduction
-This starter is based on shopify-app-cli
-Using the [Shopify-App-CLI](https://github.com/Shopify/shopify-app-cli)
+This starter is based on https://github.com/Shopify/shopify-app-node
+Using the [shopify-app-node](https://github.com/Shopify/shopify-app-node)
 
 The technos used are :
 - Node
