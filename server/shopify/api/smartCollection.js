@@ -35,11 +35,6 @@ export const getSmartCollections = async (filter = []) => {
   filter = ["limit=250", ...filter];
   const queryString = filter.join("&");
 
-  console.log(
-    "queryString",
-    `/smart_collections.json?${queryString}`
-  );
-
   let nextPage = `/smart_collections.json?${queryString}`;
   let arResult = [];
 
