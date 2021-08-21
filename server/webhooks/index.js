@@ -3,11 +3,10 @@ import { receiveWebhook, registerWebhook } from "@shopify/koa-shopify-webhooks";
 
 dotenv.config();
 
-const { WEBHOOKS } = process.env;
+const webhooks = process.env.WEBHOOKS.split(',')
 
 export const create = async (hostname, accessToken, shop) => {
   const apiVersion = "2020-07";
-  const webhooks = [WEBHOOKS]
 
   if (webhooks.includes("ORDERS_CREATE")) {
     const registration = await registerWebhook({
@@ -86,7 +85,7 @@ export const create = async (hostname, accessToken, shop) => {
   console.log('webhooks', webhooks);
 
   const uninstallRegistration = await registerWebhook({
-    address: `https://${hostname}/app/webhook/app/uninstalled`,
+    address: `https://${hostname}/app/webhook/uninstalled`,
     topic: "APP_UNINSTALLED",
     accessToken,
     shop,

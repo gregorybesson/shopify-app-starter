@@ -16,7 +16,7 @@ const webhooksRouter = new Router({ prefix: "/webhook" });
 /**
  * We reset the permanent access token of this store
  */
-webhooksRouter.post("/app/uninstalled", webhook, async (ctx) => {
+webhooksRouter.post("/uninstalled", webhook, async (ctx) => {
   const appli = ctx.request.body;
   const shop = appli.myshopify_domain
   const key = { store: shop, sk: "settings" };
@@ -32,6 +32,54 @@ webhooksRouter.post("/app/uninstalled", webhook, async (ctx) => {
     status: "success",
     result: "ok",
   };
+});
+
+/**
+ * Payload
+ *{
+ * shop_id: 954889,
+ * shop_domain: "snowdevil.myshopify.com",
+ * orders_requested: [299938, 280263, 220458],
+ * customer: {
+ *  id: 191167,
+ *   email: "john@email.com",
+ *   phone: "555-625-1199",
+ * },
+ * data_request: {
+ *   id: 9999,
+ * },
+ *};
+*/
+webhooksRouter.post("/gdpr/customers_data_request", async (ctx) => {
+  console.log(ctx.request.body);
+});
+
+/**
+ * Payload
+ * {
+ *   shop_id: 954889,
+ *   shop_domain: "snowdevil.myshopify.com",
+ *   customer: {
+ *     id: 191167,
+ *     email: "john@email.com",
+ *     phone: "555-625-1199",
+ *   },
+ *   orders_to_redact: [299938, 280263, 220458],
+ * };
+*/
+webhooksRouter.post("/gdpr/customers_redact", async (ctx) => {
+  console.log(ctx.request.body);
+});
+
+/**
+ * Payload
+ * {
+ *   shop_id: 954889,
+ *   shop_domain: "snowdevil.myshopify.com",
+ * };
+*/
+webhooksRouter.post("/gdpr/shop_redact", async (ctx) => {
+  console.log(ctx.request.body);
 });
 
 export default webhooksRouter;

@@ -15,7 +15,9 @@ The technos used are :
   - It then use the online token so that we may adapt the autorizations to the online user rights
 - The the react component support used in the origianl pages/_app.js ended in March 2020. I've replaced it with @apollo/client (see https://github.com/Shopify/shopify-app-node/issues/555)
 - The session Storage is DynamoDB in this starter.
--
+- The following webhooks are prepared :
+  - Uninstall
+  - The 3 mandatory GDPR endpoints (https://shopify.dev/apps/webhooks/mandatory). You have to enter their URL when you create the app on your partner portal
 
 ## New features
 The stazrter contains ready to use services to make the dev of your shopify app fast and easy :
@@ -63,13 +65,17 @@ This directory is dedicated to your nextJS pages appearing in the Shoify's BO If
 # Steps to develop a new app for a Shopify store
 1. clone this repo
 2. Go on your Shopify's partner page and create an app : https://www.shopify.com/partners
-   1. use a https ngrok domain like lc-mydemo.ngrok.io
-   2. use the preferences link https://lc-mydemo.ngrok.io/preferences
-   3. use the redirection https://lc-mydemo.ngrok.io/auth/callback
-   4. Note the API key and secret
+   1. use a https ngrok domain like livingcolor.ngrok.io
+   2. use the preferences link https://livingcolor.ngrok.io/preferences
+   3. use the redirection https://livingcolor.ngrok.io/auth/callback
+   4. fill in the GDPR mandatory endpoints:
+      1. https://livingcolor.ngrok.io//app/webhook/gdpr/customers_data_request
+      2. https://livingcolor.ngrok.io//app/webhook/gdpr/customers_redact
+      3. [/app/webhook/gdpr/customers_redact](https://livingcolor.ngrok.io/app/webhook/gdpr/shop_redact)
+   5. Note the API key and secret
 3. enter the api key and secret key in your .env file
 4. copy .env.dist to .env and change your .env parameters accordingly (DATABASE, HOST, S3BUCKET, ...)
-5. Start the server `PORT=8088 npm run dev` then launch your ngrok tunnel `ngrok http 8088 --subdomain=lc-mydemo`
+5. Start the server `PORT=8088 npm run dev` then launch your ngrok tunnel `ngrok http 8088 --subdomain=livingcolor`
 6. Install the app using the link on your partner's app webpage
 
 You're good to go :rocket:
