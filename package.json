@@ -4,9 +4,11 @@
   "description": "Shopify's node app starter to code fast !",
   "scripts": {
     "test": "jest",
-    "dev": "NODE_ENV=development nodemon ./server/index.js",
-    "build": "next build",
-    "start": "NODE_ENV=production node --tls-min-v1.2 ./server/index.js"
+    "dev": "rm -rf .next && NODE_ENV=development nodemon ./server/index.js",
+    "build": "rm -rf .next && NEXT_TELEMETRY_DISABLED=1 next build",
+    "start": "npm run build && NODE_ENV=production node --tls-min-v1.2 ./server/index.js",
+    "update":"ncu -u",
+    "update:check": "ncu"
   },
   "repository": {
     "type": "git",
@@ -28,12 +30,12 @@
     "@shopify/app-bridge-utils": "^2.0.3",
     "@shopify/app-cli-node-generator-helper": "^1.2.2",
     "@shopify/koa-shopify-auth": "gregorybesson/koa-shopify-auth",
-    "@shopify/koa-shopify-graphql-proxy": "^5.0.2",
-    "@shopify/koa-shopify-webhooks": "^3.0.2",
+    "@shopify/koa-shopify-graphql-proxy": "^6.0.0",
+    "@shopify/koa-shopify-webhooks": "^4.0.0",
     "@shopify/polaris": "^6.6.0",
     "@sindresorhus/slugify": "^2.1.0",
     "apollo-boost": "^0.4.9",
-    "aws-sdk": "^2.967.0",
+    "aws-sdk": "^2.973.0",
     "axios": "^0.21.1",
     "bottleneck": "^2.19.5",
     "cookies-next": "^1.1.3",
@@ -62,7 +64,7 @@
     "react-apollo": "^3.1.5",
     "react-dom": "^17.0.2",
     "react-router-dom": "^5.2.0",
-    "ssh2-sftp-client": "^7.0.1",
+    "ssh2-sftp-client": "^7.0.3",
     "xml2js": "^0.4.23"
   },
   "devDependencies": {
@@ -77,7 +79,8 @@
     "jest": "27.0.6",
     "lint-staged": "^11.1.2",
     "nodemon": "^2.0.12",
-    "npm": "^7.20.6",
+    "npm": "^7.21.0",
+    "npm-check-updates": "^11.8.3",
     "prettier": "^2.3.2",
     "react-addons-test-utils": "15.6.2",
     "react-test-renderer": "17.0.2"
