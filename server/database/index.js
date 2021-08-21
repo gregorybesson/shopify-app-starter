@@ -55,7 +55,6 @@ export const addItem = async (item) => {
 
   try {
     const data = await docClient.put(params).promise();
-    //console.log("addItem Success");
 
     return data;
   } catch (err) {
@@ -78,7 +77,7 @@ export const getItem = async (key) => {
 
     return data;
   } catch (err) {
-    console.log("getItem Failure", err.message);
+    console.log("getItem Failure", err.message, params);
 
     return false;
   }
@@ -107,17 +106,10 @@ export const updateItem = async (key, changeset) => {
   }
 };
 
-export const removeItem = async (item) => {
+export const removeItem = async (key) => {
   var params = {
     TableName: DATABASE,
-    Key: {
-      store: "izacstore",
-      title: "title izacstore",
-    },
-    ConditionExpression: "info.rating <= :val",
-    ExpressionAttributeValues: {
-      ":val": 5.0,
-    },
+    Key: key,
   };
 
   try {

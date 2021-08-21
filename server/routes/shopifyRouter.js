@@ -21,30 +21,6 @@ shopifyRouter.get("/test-delete-store", koaBody(), async (ctx) => {
   };
 });
 
-shopifyRouter.get("/test-get-store", koaBody(), async (ctx) => {
-  await db.createTable();
-  let item = await db.getItem({ store: "store1" });
-
-  if (!item) {
-    console.log("item not found", item);
-
-    item = await db.addItem({
-      store: "store1",
-      fastmag: {
-        enseigne: "FORM_IZAC",
-        magasin: "WEB",
-        compte: "DISKO",
-        motpasse: "123456!",
-      },
-    });
-  }
-
-  ctx.body = {
-    status: "success",
-    result: item,
-  };
-});
-
 shopifyRouter.get("/get-inventory", koaBody(), async (ctx) => {
   //const inventoryToUpdate = []
   // Je récupère tous les variants shopify avec id et qty stock, prix et id fastmag
@@ -711,7 +687,7 @@ shopifyRouter.get("/set-page-meta", koaBody(), async (ctx) => {
 
 shopifyRouter.get("/post-carrierService", koaBody(), async (ctx) => {
   const changeset = {
-    name: "Izac Click&Collect",
+    name: "Click&Collect",
     callback_url: `${HOST}/app/storelocator/get-shipping`,
     service_discovery: true,
   };

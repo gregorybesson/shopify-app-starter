@@ -57,6 +57,8 @@ export const del = async (query) => {
 };
 
 export const getUrl2 = () => {
+  console.log('settings', settings);
+
   if (
     !settings ||
     !settings.shopName ||

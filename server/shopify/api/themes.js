@@ -1,5 +1,5 @@
 import axios from "axios";
-import { get, put, post, del, getUrl, getHeaders } from "../query";
+import { get, put, post, del, getUrl, getHeaders, sleep } from "../query";
 import _ from "lodash";
 
 /**
@@ -26,6 +26,8 @@ export const getSections = async () => {
     (asset) => asset.key.startsWith("sections/") && !asset.key.includes("-lc-")
   );
   for (const section of sections) {
+    // I wait 1s between each call
+    await sleep(1000)
     let liquid = null;
     try {
       liquid = await getAsset(section.key);
@@ -52,7 +54,10 @@ export const getSections = async () => {
             let json = JSON.parse(match);
             //delete json.presets;
             schema = json;
-            const category = _.get(schema, "presets[0].category.en", null);
+            let category = _.get(schema, "presets[0].category.en", null);
+            if (!category) {
+              category = _.get(schema, "presets[0].category", null);
+            }
             if (category) {
               if (!_.get(cmsSections, category, null)) {
                 cmsSections[category] = [];

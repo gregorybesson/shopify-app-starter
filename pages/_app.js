@@ -1,47 +1,83 @@
-import ApolloClient from "apollo-boost";
-import fetch from "node-fetch";
-import { ApolloProvider } from "react-apollo";
+import { ApolloClient, ApolloProvider, InMemoryCache, createHttpLink } from '@apollo/client';
 import App from "next/app";
-import Head from 'next/head';
 import { AppProvider } from "@shopify/polaris";
-import { Provider } from "@shopify/app-bridge-react";
-import Cookies from "js-cookie";
-import ClientRouter from "../components/ClientRouter";
+import { Provider, useAppBridge } from "@shopify/app-bridge-react";
+import { authenticatedFetch } from "@shopify/app-bridge-utils";
+import { Redirect } from "@shopify/app-bridge/actions";
 import "@shopify/polaris/dist/styles.css";
-import translations from "@shopify/polaris/locales/fr.json";
+import translations from "@shopify/polaris/locales/en.json";
 
-const client = new ApolloClient({
-  fetch: fetch,
-  fetchOptions: {
-    credentials: "include",
-  },
-});
+function userLoggedInFetch(app) {
+  const fetchFunction = authenticatedFetch(app);
+
+  return async (uri, options) => {
+    const response = await fetchFunction(uri, options);
+
+    if (
+      response.headers.get("X-Shopify-API-Request-Failure-Reauthorize") === "1"
+    ) {
+      const authUrlHeader = response.headers.get(
+        "X-Shopify-API-Request-Failure-Reauthorize-Url"
+      );
+
+      console.log('response.headers', response.headers.get("X-Shopify-API-Request-Failure-Reauthorize"), authUrlHeader);
+
+
+      const redirect = Redirect.create(app);
+      redirect.dispatch(Redirect.Action.APP, authUrlHeader || `/auth`);
+      return null;
+    }
+
+    return response;
+  };
+}
+
+function MyProvider(props) {
+  const app = useAppBridge();
+
+  const client = new ApolloClient({
+    cache: new InMemoryCache(),
+    link: createHttpLink({
+      credentials: 'include',
+      headers: {
+        "Content-Type": "application/graphql"
+      },
+      fetch: userLoggedInFetch(app)
+    })
+  });
+
+  const Component = props.Component;
+
+  return (
+    <ApolloProvider client={client}>
+      <Component {...props} />
+    </ApolloProvider>
+  );
+}
+
 class MyApp extends App {
   render() {
-    const { Component, pageProps } = this.props;
-    const config = {
-      apiKey: API_KEY,
-      shopOrigin: Cookies.get("shopOrigin"),
-      forceRedirect: true,
-    };
+    const { Component, pageProps, host } = this.props;
     return (
-      <>
-        <Head>
-          <title>MyStoreLocator</title>
-          <meta charSet="utf-8" />
-        </Head>
-
-        <Provider config={config}>
-          <ClientRouter />
-          <AppProvider i18n={translations}>
-            <ApolloProvider client={client}>
-              <Component {...pageProps} />
-            </ApolloProvider>
-          </AppProvider>
+      <AppProvider i18n={translations}>
+        <Provider
+          config={{
+            apiKey: API_KEY,
+            host: host,
+            forceRedirect: true,
+          }}
+        >
+          <MyProvider Component={Component} {...pageProps} />
         </Provider>
-      </>
+      </AppProvider>
     );
   }
 }
+
+MyApp.getInitialProps = async ({ ctx }) => {
+  return {
+    host: ctx.query.host,
+  };
+};
 
 export default MyApp;

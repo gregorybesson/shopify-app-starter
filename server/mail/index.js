@@ -47,10 +47,10 @@ export const sendMail = async (
   const record = await db.getItem({ store: SHOP, sk: "settings" });
   const shop = {
     email_logo_url:
-      "https://www.izac.fr/skin/frontend/rwd/default/images/logo-izac-blason.png",
+      "https://assets.website-files.com/5f4e5c1f49514d483ecd0a29/5f4e5c29aa06964afc1ae7bc_Logo%2520%25231-p-500.png",
     email_logo_width: "200",
     email_accent_color: "#000",
-    name: "Izac",
+    name: "Livingcolor",
     url: `https://${SHOP}`,
   };
   console.log("sendMail template", template);

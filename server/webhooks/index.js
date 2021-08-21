@@ -84,26 +84,21 @@ export const create = async (hostname, accessToken, shop) => {
     }
   }
   console.log('webhooks', webhooks);
-  console.log('webhooks["APP_UNINSTALLED"]', webhooks["APP_UNINSTALLED"]);
 
-  if (webhooks.includes("APP_UNINSTALLED")) {
-    console.log('webhooks APP_UNINSTALLED called');
+  const uninstallRegistration = await registerWebhook({
+    address: `https://${hostname}/app/webhook/app/uninstalled`,
+    topic: "APP_UNINSTALLED",
+    accessToken,
+    shop,
+    apiVersion: apiVersion,
+  });
 
-    const uninstallRegistration = await registerWebhook({
-      address: `https://${hostname}/app/webhook/app/uninstalled`,
-      topic: "APP_UNINSTALLED",
-      accessToken,
-      shop,
-      apiVersion: apiVersion,
-    });
-
-    if (uninstallRegistration.success) {
-      console.log("Successfully registered APP_UNINSTALLED webhook!");
-    } else {
-      console.log(
-        "Failed to register APP_UNINSTALLED webhook",
-        uninstallRegistration.result
-      );
-    }
+  if (uninstallRegistration.success) {
+    console.log("Successfully registered APP_UNINSTALLED webhook!");
+  } else {
+    console.log(
+      "Failed to register APP_UNINSTALLED webhook",
+      uninstallRegistration.result
+    );
   }
 };

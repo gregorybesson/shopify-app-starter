@@ -1,6 +1,5 @@
 # Introduction
 This starter is based on https://github.com/Shopify/shopify-app-node
-Using the [shopify-app-node](https://github.com/Shopify/shopify-app-node)
 
 The technos used are :
 - Node
@@ -61,3 +60,8 @@ This directory is dedicated to your nextJS pages appearing in the Shoify's BO If
 6. Install the app using the link on your partner's app webpage
 
 You're good to go
+
+# Dev this starter
+## test the auth offline/online
+1. When installing the app for the first time, the app will create the offline session first then the online session of the user. To reproduce this step: remove the app from your shopify store and delete the entry in your dynamoDB instance.
+
