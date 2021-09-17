@@ -1,4 +1,3 @@
-import axios from "axios";
 import { get, put, post, del, getUrl, getHeaders, sleep } from "../query";
 import _ from "lodash";
 

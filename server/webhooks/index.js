@@ -6,7 +6,7 @@ dotenv.config();
 const webhooks = process.env.WEBHOOKS.split(',')
 
 export const create = async (hostname, accessToken, shop) => {
-  const apiVersion = "2020-07";
+  const apiVersion = "2021-07";
 
   if (webhooks.includes("ORDERS_CREATE")) {
     const registration = await registerWebhook({
@@ -22,7 +22,7 @@ export const create = async (hostname, accessToken, shop) => {
     } else {
       console.log(
         "Failed to register ORDERS_CREATE webhook",
-        registration.result
+        registration.result.data.webhookSubscriptionCreate.userErrors
       );
     }
   }
@@ -40,7 +40,7 @@ export const create = async (hostname, accessToken, shop) => {
     } else {
       console.log(
         "Failed to register CUSTOMERS_CREATE webhook",
-        customerCreate.result
+        customerCreate.result.data.webhookSubscriptionCreate.userErrors
       );
     }
   }
@@ -59,7 +59,7 @@ export const create = async (hostname, accessToken, shop) => {
     } else {
       console.log(
         "Failed to register CUSTOMERS_UPDATE webhook",
-        customerUpdate.result
+        customerUpdate.result.data.webhookSubscriptionCreate.userErrors
       );
     }
   }
@@ -78,11 +78,48 @@ export const create = async (hostname, accessToken, shop) => {
     } else {
       console.log(
         "Failed to register REFUNDS_CREATE webhook",
-        refundsCreate.result
+        refundsCreate.result.data.webhookSubscriptionCreate.userErrors
       );
     }
   }
-  console.log('webhooks', webhooks);
+
+  if (webhooks.includes("APP_SUBSCRIPTIONS_UPDATE")) {
+    const subscriptionsUpdateWebhook = await registerWebhook({
+        address: `https://${hostname}/app/webhook/subscription/update`,
+        topic: "APP_SUBSCRIPTIONS_UPDATE",
+        accessToken,
+        shop,
+        apiVersion: apiVersion,
+      });
+
+    if (subscriptionsUpdateWebhook.success) {
+      console.log(`Successfully registered APP_SUBSCRIPTIONS_UPDATE webhook! for ${shop}`)
+    } else {
+      console.log(
+        "Failed to register APP_SUBSCRIPTIONS_UPDATE webhook",
+        subscriptionsUpdateWebhook.result.data.webhookSubscriptionCreate.userErrors
+      );
+    }
+  }
+
+  if (webhooks.includes("APP_PURCHASES_ONE_TIME_UPDATE")) {
+    const subscriptionsOnetimeWebhook = await registerWebhook({
+        address: `https://${hostname}/app/webhook/subscription/update`,
+        topic: "APP_PURCHASES_ONE_TIME_UPDATE",
+        accessToken,
+        shop,
+        apiVersion: apiVersion,
+      });
+
+    if (subscriptionsOnetimeWebhook.success) {
+      console.log(`Successfully registered APP_PURCHASES_ONE_TIME_UPDATE webhook! for ${shop}`)
+    } else {
+      console.log(
+        "Failed to register APP_PURCHASES_ONE_TIME_UPDATE webhook",
+        subscriptionsOnetimeWebhook.result.data.webhookSubscriptionCreate.userErrors
+      );
+    }
+  }
 
   const uninstallRegistration = await registerWebhook({
     address: `https://${hostname}/app/webhook/uninstalled`,
@@ -97,7 +134,7 @@ export const create = async (hostname, accessToken, shop) => {
   } else {
     console.log(
       "Failed to register APP_UNINSTALLED webhook",
-      uninstallRegistration.result
+      uninstallRegistration.result.data.webhookSubscriptionCreate.userErrors
     );
   }
 };

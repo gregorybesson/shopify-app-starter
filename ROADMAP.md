@@ -30,7 +30,7 @@ OK - Implement the online access
   - Private app: TBD
 
   => some functions can only check if the call is from shopify store
-  => some may check if the call is from shopidy store + decrypt the token in the querystring
+  => some may check if the call is from shopify store + decrypt the token in the querystring
   => some rely on the default auth mechanism
   => some may bypass the auth with the offline token if called internally in the app (CRON)
 - refactor Shopify API with the shopify-api REST and GRAPHQL helpers

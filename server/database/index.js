@@ -241,3 +241,27 @@ export const log = async (shop, action, data) => {
 
   return sk;
 };
+
+export const updateSettings = async (shop, key, settings) => {
+  const key = { store: shop, sk: "settings" };
+  let item = await getItem(key);
+  let changeset = {
+    store: shop,
+    sk: "settings"
+  }
+  changeset[key] = settings
+
+  if (!item || _.isEmpty(item)) {
+    item = await addItem(changeset);
+  } else {
+    changeset = {
+      UpdateExpression: "set #key = :x",
+      ExpressionAttributeNames: { "#key": key },
+      ExpressionAttributeValues: { ":x": settings },
+    };
+
+    item = await db.updateItem(key, changeset);
+  }
+
+  return item
+}

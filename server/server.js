@@ -26,9 +26,7 @@ process.env.AWS_NODEJS_CONNECTION_REUSE_ENABLED = "1";
 dotenv.config();
 const port = parseInt(process.env.PORT, 10) || 8081;
 const dev = process.env.NODE_ENV !== "production";
-const app = next({
-  dev,
-});
+const app = next({ dev });
 const handle = app.getRequestHandler();
 
 Shopify.Context.initialize({
@@ -69,6 +67,7 @@ async function prepareAuthSession(ctx, next) {
 
   await next();
 }
+
 /**
  * The default authent is 'online'
  * + During the first install, I force the offline flow to install the permanent token
@@ -97,6 +96,67 @@ async function forceOnlineMode(ctx, next) {
 
   await next();
 }
+
+/**
+ * "billing": {
+ *  "type": "SUBSCRIPTION",
+ *  "id": 12345,
+ *  "active": true,
+ *  "price": 10.00,
+ *  "interval": "EVERY_30_DAYS",
+ *  "created_at": "",
+ *  "trialDays": 0,
+ *  "updated_at": ""
+ * }
+*/
+async function checkBilling(shop, host) {
+  let returnUrl = `https://${Shopify.Context.HOST_NAME}?host=${host}&shop=${shop}`;
+  const key = { store: shop, sk: "settings" };
+  let item = await getItem(key);
+
+  switch (process.env.BILLING) {
+    case 'NONE':
+      if (!item || _.isEmpty(item) || _.get(item, 'billing.type') !== "NONE") {
+        db.updateSettings(shop, { "billing": { "type": "NONE" } })
+      }
+      break;
+    case 'SUBSCRIPTION':
+    case 'SUBSCRIPTION-NO-DEV':
+      if (process.env.BILLING === "SUBSCRIPTION-NO-DEV") {
+        const shop = shopifyAPI.getShop()
+        if (shop.plan_name === "affiliate") {
+          if (!item || _.isEmpty(item) || _.get(item, 'billing.type') !== "NONE") {
+            db.updateSettings({ "billing": { "type": "NONE" } })
+          }
+          break;
+        }
+      }
+
+      if (!item || _.isEmpty(item) || _.get(item, "Item.billing.type") !== "SUBSCRIPTION" || !_.get(item, "Item.billing.active", false)) {
+        const subscription = shopifyAPI.createAppSubscription(returnUrl)
+        db.updateSettings(shop, {
+          "billing": {
+            "type": "SUBSCRIPTION",
+            "id": subscription.id,
+            "active": true,
+            "price": 10.00,
+            "interval": "EVERY_30_DAYS",
+            "created_at": "",
+            "trialDays": 0,
+            "updated_at": ""
+          }
+        })
+        returnUrl = subscription.confirmationUrl
+        break;
+      }
+    case 'ONE-TIME':
+      console.log('ONE-TIME payment');
+      break;
+  }
+
+  return returnUrl
+}
+
 cron.init();
 cacheProvider.start(function (err) {
   if (err) console.error(err);
@@ -124,14 +184,14 @@ app.prepare().then(async () => {
       async afterAuth(ctx) {
         // Access token and shop available in ctx.state.shopify
         const { shop, accessToken, scope } = ctx.state.shopify;
-        const host = ctx.query.host;
-        // STARTER
+        const { host } = ctx.query;
+
         if (ctx.state.accessMode === "offline") {
           webhooks.create(ctx.hostname, accessToken, shop);
         }
-        // /STARTER
 
         // Redirect to app with shop parameter upon auth
+        const redirectURL = checkBilling(shop, host)
         ctx.redirect(`/?shop=${shop}&host=${host}`);
       },
     })
