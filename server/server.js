@@ -112,7 +112,7 @@ async function forceOnlineMode(ctx, next) {
 async function checkBilling(shop, host) {
   let returnUrl = `https://${Shopify.Context.HOST_NAME}?host=${host}&shop=${shop}`;
   const key = { store: shop, sk: "settings" };
-  let item = await getItem(key);
+  let item = await db.getItem(key);
 
   switch (process.env.BILLING) {
     case 'NONE':

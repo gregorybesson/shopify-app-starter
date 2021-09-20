@@ -77,7 +77,7 @@ export const createAppSubscription = async (returnUrl) => {
   return result;
 };
 
-export const cancelAppSubscription = () => {
+export const cancelAppSubscription = async() => {
   const query = `mutation {
     appSubscriptionCancel(
       id: "gid://shopify/AppSubscription/4019585080"

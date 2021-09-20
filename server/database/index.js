@@ -242,7 +242,7 @@ export const log = async (shop, action, data) => {
   return sk;
 };
 
-export const updateSettings = async (shop, key, settings) => {
+export const updateSettings = async (shop, settings) => {
   const key = { store: shop, sk: "settings" };
   let item = await getItem(key);
   let changeset = {
