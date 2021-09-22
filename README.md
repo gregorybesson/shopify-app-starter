@@ -69,10 +69,11 @@ These directories are dedicated to your nextJS pages appearing in the Shoify's B
    2. use the preferences link https://livingcolor.ngrok.io/preferences
    3. use the redirection https://livingcolor.ngrok.io/auth/callback
    4. fill in the GDPR mandatory endpoints:
-      1. [/app/webhook/gdpr/customers_data_request]https://livingcolor.ngrok.io/app/webhook/gdpr/customers_data_request
-      2. [/app/webhook/gdpr/customers_redact]https://livingcolor.ngrok.io/app/webhook/gdpr/customers_redact
+      1. [/app/webhook/gdpr/customers_data_request](https://livingcolor.ngrok.io/app/webhook/gdpr/customers_data_request)
+      2. [/app/webhook/gdpr/customers_redact](https://livingcolor.ngrok.io/app/webhook/gdpr/customers_redact)
       3. [/app/webhook/gdpr/shop_redact](https://livingcolor.ngrok.io/app/webhook/gdpr/shop_redact)
-   5. Note the API key and secret
+   5. You may create a proxy URL the URL proxy starts with: `https://livingcolor.ngrok.io/app/` (you can add a specifi route to it)
+   6. Note the API key and secret
 3. copy .env.dist to .env and change your .env parameters accordingly (DATABASE, HOST, S3BUCKET, ...) + enter the api key and secret key from the previous step
 4. Start the server `PORT=8088 npm run dev` then launch your ngrok tunnel `ngrok http 8088 --subdomain=livingcolor`
 5. Install the app using the link on your partner's app webpage

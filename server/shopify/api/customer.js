@@ -73,7 +73,7 @@ export const getCustomerMetafields = async (id) => {
 };
 
 /**
- * When you change the price, be cautious that the compare_at_price is null or is > price
+ *
  * @param {*} customerId
  * @param {*} changeset
  */
