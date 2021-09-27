@@ -57,16 +57,16 @@ Shopify.Context.initialize({
 async function prepareAuthSession(ctx, next) {
   const { session, query } = ctx;
   let shop = query["shop"];
-  console.log('shop prepareAuthSession', shop );
 
-  if (validateSignature(ctx.query)) {
-    shop = ctx.get('X-Shopify-Shop-Domain');
-    shop = shop.split('.')[0]
-    const offlineSession = await Shopify.Utils.loadOfflineSession(shop)
-    if (offlineSession && offlineSession.accessToken) {
-      shopifyAPI.setSettings({ shopName: offlineSession.shop, accessToken: offlineSession.accessToken })
-    }
-  } else if (shop) {
+  // We have to improve it. The webhook authentication is done with receiveWebhook
+  // We should centralize the way we handle the offline token in such a case
+  const webhookShop = ctx.get('X-Shopify-Shop-Domain') || ctx.get('x-shopify-shop-domain');
+  if (webhookShop != null && webhookShop != '') {
+    shop = webhookShop
+  }
+
+  console.log('shop prepareAuthSession', shop );
+  if (shop) {
     const offlineSession = await Shopify.Utils.loadOfflineSession(shop)
     if (offlineSession && offlineSession.accessToken) {
       shopifyAPI.setSettings({ shopName: offlineSession.shop, accessToken: offlineSession.accessToken })
