@@ -57,7 +57,7 @@ export const del = async (query) => {
 };
 
 export const getUrl2 = () => {
-  console.log('settings', settings);
+  //console.log('settings', settings);
 
   if (
     !settings ||

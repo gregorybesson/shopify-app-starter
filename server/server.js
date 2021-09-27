@@ -16,6 +16,7 @@ import * as db from "./database";
 import * as shopifyAPI from "./shopify";
 import * as cron from "../app/cron";
 import { DynamoSessionStorage } from "./dynamoSessionStorage";
+import { validateSignature } from "../utils/validateSignature"
 let cacheProvider = require("./cacheProvider");
 // we authorize Ajax calls to unverified CERTS
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
@@ -55,10 +56,17 @@ Shopify.Context.initialize({
  */
 async function prepareAuthSession(ctx, next) {
   const { session, query } = ctx;
-  const shop = query["shop"];
+  let shop = query["shop"];
   console.log('shop prepareAuthSession', shop );
 
-  if (shop) {
+  if (validateSignature(ctx.query)) {
+    shop = ctx.get('X-Shopify-Shop-Domain');
+    shop = shop.split('.')[0]
+    const offlineSession = await Shopify.Utils.loadOfflineSession(shop)
+    if (offlineSession && offlineSession.accessToken) {
+      shopifyAPI.setSettings({ shopName: offlineSession.shop, accessToken: offlineSession.accessToken })
+    }
+  } else if (shop) {
     const offlineSession = await Shopify.Utils.loadOfflineSession(shop)
     if (offlineSession && offlineSession.accessToken) {
       shopifyAPI.setSettings({ shopName: offlineSession.shop, accessToken: offlineSession.accessToken })

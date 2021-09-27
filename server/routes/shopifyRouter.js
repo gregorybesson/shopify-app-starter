@@ -79,6 +79,17 @@ shopifyRouter.get(
   }
 );
 
+shopifyRouter.get("/get-fulfillmentServices", koaBody(), async (ctx) => {
+  const fulfillmentsservices = await shopify.getFulfillmentServices();
+  const locationId = fulfillmentsservices[0]["location"]["id"];
+
+  ctx.body = {
+    status: "success",
+    result: fulfillmentsservices,
+    locationId: locationId
+  };
+});
+
 shopifyRouter.get("/post-fulfillmentService", koaBody(), async (ctx) => {
   const changeset = {
     name: "myservice",

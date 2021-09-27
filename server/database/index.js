@@ -260,7 +260,7 @@ export const updateSettings = async (shop, settings) => {
       ExpressionAttributeValues: { ":x": settings },
     };
 
-    item = await db.updateItem(key, changeset);
+    item = await updateItem(key, changeset);
   }
 
   return item
