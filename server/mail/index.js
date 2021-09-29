@@ -16,8 +16,6 @@ let transporter = nodemailer.createTransport({
   }),
 });
 
-const { SHOP } = process.env;
-
 /**
  *
  *
@@ -44,7 +42,6 @@ export const sendMail = async (
   //  }
   // ]
 
-  const record = await db.getItem({ store: SHOP, sk: "settings" });
   const shop = {
     email_logo_url:
       "https://assets.website-files.com/5f4e5c1f49514d483ecd0a29/5f4e5c29aa06964afc1ae7bc_Logo%2520%25231-p-500.png",

@@ -28,6 +28,7 @@ OK - Implement the online access
   - regular login from a shopify app: in the iframe through react
   - CRON
   - Private app: TBD
+  - WebHook: Check the Shopify Origin then load the offline token (To be improved)
 
   => some functions can only check if the call is from shopify store
   => some may check if the call is from shopify store + decrypt the token in the querystring

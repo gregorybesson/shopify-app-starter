@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 
 dotenv.config();
-const { SHOP } = process.env;
+
 var CronJob = require("cron").CronJob;
 
 // at 1:00 am everyday:   0 1 * * *
