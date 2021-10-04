@@ -3,7 +3,7 @@ import { receiveWebhook, registerWebhook } from "@shopify/koa-shopify-webhooks";
 
 dotenv.config();
 
-const webhooks = process.env.WEBHOOKS.split(',')
+const webhooks = process.env.WEBHOOKS ? process.env.WEBHOOKS.split(',') : []
 
 export const create = async (hostname, accessToken, shop) => {
   const apiVersion = "2021-07";
