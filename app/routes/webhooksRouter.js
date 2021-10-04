@@ -14,18 +14,25 @@ const webhooksRouter = new Router({ prefix: "/webhook" });
 // Register to the desired wehooks by declaring them in your .env
 
 /**
- * We reset the permanent access token of this store
+ * We reset the permanent access token of this store.
+ * TODO: Add uninstall date to the store settings key
+ *
  */
 webhooksRouter.post("/uninstalled", webhook, async (ctx) => {
   const appli = ctx.request.body;
   const shop = appli.myshopify_domain
-  const key = { store: shop, sk: "settings" };
-  var changeset = {
-    UpdateExpression: "remove #token",
-    ExpressionAttributeNames: { "#token": "accessToken" },
-  };
+  const sk = `session#id#offline_${shop}`;
+  const sessionKey = { store: 'all', sk: sk };
 
-  await db.updateItem(key, changeset);
+  await db.removeItem(sessionKey);
+
+  // const key = { store: shop, sk: "settings" };
+  // var changeset = {
+  //   UpdateExpression: "remove #token",
+  //   ExpressionAttributeNames: { "#token": "accessToken" },
+  // };
+
+  // await db.updateItem(key, changeset);
   console.log('shop', shop, "deactivated");
 
   ctx.body = {

@@ -65,7 +65,7 @@ async function prepareAuthSession(ctx, next) {
     shop = webhookShop
   }
 
-  console.log('shop prepareAuthSession', shop );
+  console.log('shop prepareAuthSession', shop, ctx.url );
   if (shop) {
     const offlineSession = await Shopify.Utils.loadOfflineSession(shop)
     if (offlineSession && offlineSession.accessToken) {
@@ -187,18 +187,21 @@ app.prepare().then(async () => {
   await db.createTable();
   // /STARTER
 
+  // if you receive AppBridgeError: APP::ERROR::INVALID_CONFIG: host must be provided
+  // launch the auth on the server ie. http://livingcolor.ngrok.io/auth?shop=shopname.myshopify.com
   server.use(
     createShopifyAuth({
       async afterAuth(ctx) {
         // Access token and shop available in ctx.state.shopify
         const { shop, accessToken, scope } = ctx.state.shopify;
-        const { host } = ctx.query;
+        const host = ctx.query.host;
 
         if (ctx.state.accessMode === "offline") {
           webhooks.create(ctx.hostname, accessToken, shop);
         }
 
         // Redirect to app with shop parameter upon auth
+        //const returnUrl = `https://${Shopify.Context.HOST_NAME}?host=${host}&shop=${shop}`;
         const redirectURL = checkBilling(shop, host)
         ctx.redirect(`/?shop=${shop}&host=${host}`);
       },

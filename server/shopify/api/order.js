@@ -36,7 +36,171 @@ const { SHOP, ACCESS_TOKEN } = process.env;
     DELETE /admin/api/2020-04/orders/#{order_id}.json
     Deletes an order
 
+    POST /admin/api/2021-07/orders/{order_id}/refunds.json
+    Creates a refund
+
+    POST /admin/api/2021-07/orders/{order_id}/refunds/calculate.json
+    Calculates a refund
+
+    GET /admin/api/2021-07/orders/{order_id}/refunds.json
+    Retrieves a list of refunds for an order
+
+    GET /admin/api/2021-07/orders/{order_id}/refunds/{refund_id}.json
+    Retrieves a specific refund
+
+    GRAPHQL MUTATION
+    mutation orderEditSetQuantity($id: ID!, $lineItemId: ID!, $quantity: Int!)
  */
+
+/**
+ * Requires write_order_edits right
+ * @param {*} graphQLOrderId
+ * @returns
+ */
+const orderEditBegin = async (graphQLOrderId) => {
+  const query = {
+    query: `mutation orderEditBegin($id: ID!) {
+      orderEditBegin(id: $id) {
+        calculatedOrder {
+          id
+          lineItems(first: 10) {
+            edges {
+              node {
+                id
+                variant {
+                  sku
+                }
+              }
+            }
+          }
+        }
+        userErrors {
+          field
+          message
+        }
+      }
+    }`,
+    variables: graphQLOrderId
+  };
+
+  let result = null;
+  try {
+    const req = await post(`/graphql.json`, query);
+    result = req.data.data.orderEditBegin.calculatedOrder;
+  } catch (e) {
+    console.log(
+      "orderEditBegin error :",
+      _.get(e, "response.data.errors", _.get(e, "response.data.error", e))
+    );
+  }
+
+  return result;
+}
+
+/**
+ * Requires write_order_edits right
+ * @param {*} graphQLOrderId
+ * @returns
+ */
+const orderEditCommit = async (changeset) => {
+  // let changeset = {
+  //   "id": "", => The calculated order id (from orderBegin)
+  //   "notifyCustomer": "", => true or false
+  //   "staffNote": "" => string for the staff
+  // }
+  const query = {
+    query: `mutation orderEditCommit($id: ID!) {
+      orderEditCommit(id: $id) {
+        userErrors {
+          field
+          message
+        }
+        order {
+          id
+        }
+      }
+    }`,
+    variables: changeset
+  };
+
+  let result = null;
+  try {
+    const req = await post(`/graphql.json`, query);
+
+    result = req.data.data.orderEditCommit
+  } catch (e) {
+    console.log(
+      "orderEditCommit error :",
+      _.get(e, "response.data.errors", _.get(e, "response.data.error", e))
+    );
+  }
+
+  return result;
+}
+
+/**
+ * Requires write_order_edits right
+ * @param {*} changeset
+ * @returns
+ */
+export const orderEditSetQuantity = async (changeset) => {
+  // orderId : id of the ORIGINAL order (not the calculated one)
+  // sku : sku of the item in the ORIGINAL order (we'll use the sku to compare it with the calculated lieneitem id)
+  // quantity : new qty
+  // locationId : location of the stock
+  // restock : do we restock if we remove a qty from the order ?
+  // let changeset = {
+  //   "id": "",
+  //   "sku": "",
+  //   "quantity": "",
+  //   "locationId": "",
+  //   "restock": ""
+  // }
+  let result = null;
+  const calculatedOrder = await orderEditBegin({ id: changeset.id })
+  //console.log('calculatedOrder', calculatedOrder.lineItems.edges[0]);
+  const lineItemToChange = calculatedOrder.lineItems.edges.filter(item => item.node.variant.sku == changeset.sku)
+
+  if (lineItemToChange.length > 0) {
+    changeset['id'] = calculatedOrder.id
+    changeset['lineItemId'] = lineItemToChange[0].node.id
+
+    const query = {
+      query: `mutation orderEditSetQuantity($id: ID!, $lineItemId: ID!, $quantity: Int!) {
+        orderEditSetQuantity(id: $id, lineItemId: $lineItemId, quantity: $quantity) {
+          userErrors {
+            field
+            message
+          }
+          calculatedLineItem {
+            id
+          }
+
+          calculatedOrder {
+            id
+          }
+        }
+      }`,
+      variables: changeset
+    };
+
+    try {
+      const req = await post(`/graphql.json`, query);
+      console.log("req", req.data);
+      result = req.data.data
+    } catch (e) {
+      console.log(
+        "orderEditSetQuantity error :",
+        _.get(e, "response.data.errors", _.get(e, "response.data.error", e))
+      );
+    }
+
+    const commitOrder = await orderEditCommit({ id: calculatedOrder.id })
+    console.log('commitOrder', commitOrder);
+  }
+
+  return result;
+};
 
 export const getAllOrdersGQL = async (filter = "") => {
   //filter = "created_at:>'2020-05-30T00:00:00+0100' AND fulfillment_status:unshipped";
@@ -219,3 +383,34 @@ export const cancelOrder = async (id) => {
 
   return result.data.order;
 };
+
+/**
+ *POST /admin/api/2021-07/orders/{order_id}/refunds.json
+ * @param {*} orderId
+ * @param {*} changeset
+ */
+ export const refundsOrder = async (orderId, changeset, async = false) => {
+  changeset = {
+    order: {
+      id: orderId,
+      ...changeset,
+    },
+  };
+  //console.log(changeset)
+
+  if (!async) {
+    let result = false;
+    try {
+      result = await put(`/orders/${orderId}/refunds.json`, changeset);
+      console.log('result', result);
+
+    } catch (e) {
+      console.log("error in shopify.refundsOrder", e.response.data);
+      return false;
+    }
+
+    return result.data;
+  } else {
+    return put(`/orders/${orderId}/refunds.json`, changeset);
+  }
+ };

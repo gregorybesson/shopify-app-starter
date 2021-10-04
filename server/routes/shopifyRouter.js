@@ -21,6 +21,26 @@ shopifyRouter.get("/test-delete-store", koaBody(), async (ctx) => {
   };
 });
 
+
+shopifyRouter.get("/order-edit-set-quantity", koaBody(), async (ctx) => {
+  const fulfillmentsservices = await shopify.getFulfillmentServices();
+  const locationId = fulfillmentsservices[0]["location"]["id"];
+
+  let changeset = {
+    "id": "gid://shopify/Order/4125854859421",
+    "sku": "023010",
+    "quantity": 0,
+    "locationId": locationId,
+    "restock": false
+  }
+  const result = await shopify.orderEditSetQuantity(changeset)
+
+  ctx.body = {
+    status: "success",
+    result: result,
+  };
+});
+
 shopifyRouter.get("/get-inventory", koaBody(), async (ctx) => {
   //const inventoryToUpdate = []
   // Je récupère tous les variants shopify avec id et qty stock, prix et id fastmag
@@ -376,19 +396,20 @@ shopifyRouter.get("/get-orders-by-tag/:tags", koaBody(), async (ctx) => {
   };
 });
 
-shopifyRouter.get("/get-order", koaBody(), async (ctx) => {
-  let id = ctx.query["id"];
+shopifyRouter.get("/get-order/:id", koaBody(), async (ctx) => {
+  const id = ctx.params.id;
   const result = await shopify.getOrder(id);
   const orderMetafields = await shopify.getOrderMetafields(id);
   //console.log("orderMetafields", orderMetafields);
-  const fastmagMeta = _.find(orderMetafields, ["key", "fastmag-order-id"]);
+  //const fastmagMeta = _.find(orderMetafields, ["key", "fastmag-order-id"]);
   //console.log("fastmagMeta", fastmagMeta);
-  result["fastmagId"] = _.get(fastmagMeta, "value", "");
+  //result["fastmagId"] = _.get(fastmagMeta, "value", "");
 
   //console.log("order", result);
   ctx.body = {
     status: "success",
     result: result,
+    metafields: orderMetafields,
   };
 });
 
