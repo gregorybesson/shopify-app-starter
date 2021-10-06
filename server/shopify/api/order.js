@@ -332,6 +332,17 @@ export const getOrder = async (id) => {
   return result.data.order;
 };
 
+export const getOrderByName = async (name) => {
+  const result = await get(`/orders.json?name=${name}&status=any`)
+  const orders = _.get(result, 'data.orders', [])
+
+  if (orders.length > 0) {
+    return orders[0]
+  }
+
+  return false
+}
+
 export const getOrderMetafields = async (id) => {
   const result = await get(`/orders/${id}/metafields.json`);
 

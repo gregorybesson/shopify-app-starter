@@ -39,16 +39,11 @@ async function storeCallback(session) {
 }
 
 async function loadCallback(id) {
-  console.log('loadCallback called', id);
   const sk = `session#id#${id}`;
   const key = { store: 'all', sk: sk };
   const item = await db.getItem(key);
 
-  console.log('item loaded', item);
-
   if (!_.isEmpty(item) && _.get(item, "Item.session")) {
-    console.log('session is ok!');
-
     const session = new Session(id)
     const { shop, state, scope, accessToken, isOnline, expires, onlineAccessInfo } = _.get(item, "Item.session")
     session.shop = shop

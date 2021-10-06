@@ -65,7 +65,6 @@ async function prepareAuthSession(ctx, next) {
     shop = webhookShop
   }
 
-  console.log('shop prepareAuthSession', shop, ctx.url );
   if (shop) {
     const offlineSession = await Shopify.Utils.loadOfflineSession(shop)
     if (offlineSession && offlineSession.accessToken) {
