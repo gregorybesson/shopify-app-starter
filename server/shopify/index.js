@@ -26,6 +26,7 @@ export * from "./api/smartCollection";
 export * from "./api/themes";
 export * from "./api/transaction";
 export * from "./api/user";
+export * from "./api/webhook";
 
 export * from "./query";
 

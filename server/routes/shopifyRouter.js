@@ -21,7 +21,6 @@ shopifyRouter.get("/test-delete-store", koaBody(), async (ctx) => {
   };
 });
 
-
 shopifyRouter.get("/order-edit-set-quantity", koaBody(), async (ctx) => {
   const fulfillmentsservices = await shopify.getFulfillmentServices();
   const locationId = fulfillmentsservices[0]["location"]["id"];
@@ -848,5 +847,26 @@ const compareValues = (key, order = "desc") => {
     return order === "desc" ? comparison * -1 : comparison;
   };
 };
+
+shopifyRouter.get("/get-webhooks", koaBody(), async (ctx) => {
+  const webhooks = await shopify.getWebhooks();
+
+  ctx.body = {
+    status: "success",
+    result: webhooks,
+  };
+});
+
+shopifyRouter.get("/update-webhook/:id", koaBody(), async (ctx) => {
+  const id = ctx.params.id;
+  const address = ctx.query["address"];
+
+  const webhook = await shopify.updateWebhook(id, address);
+
+  ctx.body = {
+    status: "success",
+    result: webhook,
+  };
+});
 
 export default shopifyRouter;

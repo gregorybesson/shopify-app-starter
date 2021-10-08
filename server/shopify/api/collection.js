@@ -15,9 +15,20 @@ const { SHOP, ACCESS_TOKEN } = process.env;
  */
 
 export const getCollection = async (id) => {
-  const result = await get(`/collections/${id}.json`);
+  let result = null;
 
-  return result.data.collection;
+  try {
+    const req = await get(`/collections/${id}.json`);
+
+    result = req.data.collection
+  } catch (e) {
+    console.log(
+      "getCollection error :",
+      _.get(e, "response.data.errors", _.get(e, "response.data.error", e))
+    );
+  }
+
+  return result;
 };
 
 export const getProductsCollection = async (id) => {

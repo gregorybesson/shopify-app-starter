@@ -5,7 +5,7 @@ import * as db from "../database";
 import Shopify from "@shopify/shopify-api";
 
 async function storeCallback(session) {
-  console.log('storeCallback called', session);
+  //console.log('storeCallback called', session);
 
   const payload = { ...session }
   payload.expires = '' + session.expires
