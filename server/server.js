@@ -18,6 +18,8 @@ import * as cron from "../app/cron";
 import { DynamoSessionStorage } from "./dynamoSessionStorage";
 import { validateSignature } from "../utils/validateSignature"
 let cacheProvider = require("./cacheProvider");
+const serve  = require('koa-static')
+const mount  = require('koa-mount')
 // we authorize Ajax calls to unverified CERTS
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 // We reuse the dynamodb connection to speed up connection
@@ -57,6 +59,10 @@ Shopify.Context.initialize({
 async function prepareAuthSession(ctx, next) {
   const { session, query } = ctx;
   let shop = query["shop"];
+
+  if (!shop && ctx.hostname.endsWith('myshopify.com')) {
+    shop = ctx.hostname
+  }
 
   // We have to improve it. The webhook authentication is done with receiveWebhook
   // We should centralize the way we handle the offline token in such a case
@@ -206,6 +212,9 @@ app.prepare().then(async () => {
       },
     })
   );
+
+  // statics files in /public are served
+  server.use(mount('/app/public', serve('./public')));
 
   const handleRequest = async (ctx) => {
     await handle(ctx.req, ctx.res);
