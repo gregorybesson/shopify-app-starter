@@ -4,8 +4,6 @@ import { get, put, post, del, getUrl, getNextPage, sleep  } from "../query";
 
 dotenv.config();
 
-const { SHOP, ACCESS_TOKEN } = process.env;
-
 /**
  *  GET /admin/api/2020-07/collections/{collection_id}.json
     Retrieves a single collection

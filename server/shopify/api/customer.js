@@ -1,12 +1,9 @@
-import axios from "axios";
 import dotenv from "dotenv";
 import _ from "lodash";
-import Bottleneck from "bottleneck";
 import { get, put, post, del, getUrl, getNextPage } from "../query";
 
 dotenv.config();
 
-const { SHOP, ACCESS_TOKEN } = process.env;
 
 /**
  *  GET /admin/api/2020-07/customers.json?updated_at_min=2020-07-08 17:48:51

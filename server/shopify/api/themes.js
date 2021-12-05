@@ -22,7 +22,7 @@ export const getSections = async () => {
     `/themes/${activeTheme.id}/assets.json`
   );
   const sections = resultAssets.data.assets.filter(
-    (asset) => asset.key.startsWith("sections/") && !asset.key.includes("-lc-")
+    (asset) => asset.key.startsWith("sections/") && !asset.key.includes("-myeditor-")
   );
   for (const section of sections) {
     // I wait 1s between each call
@@ -169,7 +169,7 @@ export const removeFromLiquid = async (
 
   if (liquid) {
     let liquidValue = liquid.asset.value;
-    //const regex = /.*cp-newsletter-lc-24850.*\n/g;
+    //const regex = /.*cp-newsletter-myeditor-24850.*\n/g;
     const regex = new RegExp(`.*${str}.*\n`, "g");
     liquidValue = liquidValue.replace(regex, "");
 
@@ -192,7 +192,7 @@ export const swapContentInLiquid = async (pathFile, from, to, order) => {
     //console.log("from", from, "to", to, "order", order);
 
     let liquidValue = liquid.asset.value;
-    //const regex = /.*cp-newsletter-lc-24850.*\n/g;
+    //const regex = /.*cp-newsletter-myeditor-24850.*\n/g;
     const regexFrom = new RegExp(".*" + from + ".*", "g");
     const regexTo = new RegExp(".*" + to + ".*", "g");
     let m;
