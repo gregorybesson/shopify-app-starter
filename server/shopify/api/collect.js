@@ -6,8 +6,6 @@ import { get, put, post, del, getUrl, getNextPage } from "../query";
 
 dotenv.config();
 
-const { SHOP, ACCESS_TOKEN } = process.env;
-
 /**
  *  POST /admin/api/2020-07/collects.json
     Adds a product to a custom collection

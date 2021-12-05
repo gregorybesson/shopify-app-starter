@@ -2,8 +2,9 @@ import axios from "axios";
 import dotenv from "dotenv";
 import _ from "lodash";
 
-import { get, put, post, del, getUrl } from "../query";
-import { getFulfillmentServiceByName } from "./fulfillmentService";
+import { get, put, post, del, getUrl, getSettings, getHeaders } from "../query";
+import { getFulfillmentServiceByName, getFulfillmentServices } from "./fulfillmentService";
+import { fulfillmentOrders } from "./order";
 
 dotenv.config();
 
@@ -69,9 +70,76 @@ export const getFulfillmentOrderFulfillments = async (fulfillment_order_id) => {
   return result.data.fulfillments;
 };
 
+/**
+ * This method is the new one to handle fulfillmentOrders
+ * @param {*} orderId
+ * @returns
+ */
+export const createOrderFulfillment = async (orderId) => {
+  const fulfillmentsservices = await getFulfillmentServices();
+  //console.log('fulfillmentsservices', fulfillmentsservices);
+
+  let locationId = _.get(fulfillmentsservices, "[0].location.id", null);
+  locationId = locationId.split("/").pop();
+  const fulfillments = await fulfillmentOrders(orderId);
+  //console.log('fulfillments', fulfillments);
+
+  const lineItemsByFulfillmentOrder = fulfillments.map(fulfillmentOrder => {
+    const fulfillmentOrderLineItems = fulfillmentOrder.line_items.map(lineItem => {
+      return {
+        id: lineItem.id,
+        quantity: lineItem.quantity
+      }
+    })
+    return {
+      fulfillment_order_id: fulfillmentOrder.id,
+      fulfillment_order_line_items: fulfillmentOrderLineItems
+    }
+  })
+
+  //console.log('lineItemsByFulfillmentOrder', lineItemsByFulfillmentOrder);
+
+  let result = null;
+  try {
+    const req = await post(
+      `/orders/${orderId}/fulfillments.json`,
+      {
+        fulfillment: {
+          location_id: locationId,
+          message: "Order transmitted to JDE",
+          notify_customer: false,
+          tracking_info: {
+            number: 1562678,
+            url: "https://www.my-shipping-company.com",
+            company: "my-shipping-company"
+          },
+          line_items_by_fulfillment_order: lineItemsByFulfillmentOrder
+        }
+      }
+    );
+
+    result = req.data.fulfillment;
+  } catch (e) {
+    console.log(
+      "createOrderFulfillment error :",
+      _.get(e, "response.data.errors", _.get(e, "response.data.error", e))
+    );
+  }
+
+  return result;
+};
+
+/**
+ * DEPRECATED old method to handle fulfillments based on location
+ * @param {*} orderId
+ * @returns
+ */
 export const createFulfillment = async (orderId) => {
-  const service = await getFulfillmentServiceByName("fastmag");
-  const locationId = _.get(service, "location_id", null);
+  const fulfillmentsservices = await getFulfillmentServices();
+  console.log('fulfillmentsservices', fulfillmentsservices);
+
+  let locationId = _.get(fulfillmentsservices, "[0].location.id", null);
+  locationId = locationId.split("/").pop();
   let result = null;
   try {
     const req = await post(
@@ -150,3 +218,26 @@ export const cancelFulfillment = async (orderId, fulfillmentId) => {
 
   return result.data.fulfillment;
 };
+
+/**
+ * Request granular acces to migrate to fulfillmentOrder (instead of dulfillment)
+ */
+export const requestGranularAccess = async () => {
+  const settings = getSettings();
+  const result = await axios.post(
+    `https://${settings.shopName}/admin/request_granular_access_scopes.json`,
+    {
+      "requested_scopes": [
+        "write_assigned_fulfillment_orders",
+        "write_merchant_managed_fulfillment_orders"
+      ]
+    },
+    {
+      headers: getHeaders(),
+    }
+  );
+
+  console.log('result', result);
+
+
+}

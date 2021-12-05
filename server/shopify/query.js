@@ -68,18 +68,18 @@ export const getUrl2 = () => {
     throw new Error("Missing or invalid options");
   }
   if (settings.shopName && settings.accessToken) {
-    return `https://${settings.shopName}/admin/api/2020-10`;
+    return `https://${settings.shopName}/admin/api/2021-10`;
   }
 
-  return `https://${SHOPIFY_PRIVATE_API_KEY}:${SHOPIFY_PRIVATE_API_PASSWORD}@${SHOP}/admin/api/2020-10`;
+  return `https://${SHOPIFY_PRIVATE_API_KEY}:${SHOPIFY_PRIVATE_API_PASSWORD}@${SHOP}/admin/api/2021-10`;
 };
 
 export const getUrl = (activeShop = null, accessToken = null) => {
   if (activeShop && accessToken) {
-    return `https://${activeShop}/admin/api/2020-10`;
+    return `https://${activeShop}/admin/api/2021-10`;
   }
 
-  return `https://${SHOPIFY_PRIVATE_API_KEY}:${SHOPIFY_PRIVATE_API_PASSWORD}@${SHOP}/admin/api/2020-10`;
+  return `https://${SHOPIFY_PRIVATE_API_KEY}:${SHOPIFY_PRIVATE_API_PASSWORD}@${SHOP}/admin/api/2021-10`;
 };
 
 export const getHeaders = () => {

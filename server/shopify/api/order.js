@@ -50,6 +50,9 @@ const { SHOP, ACCESS_TOKEN } = process.env;
 
     GRAPHQL MUTATION
     mutation orderEditSetQuantity($id: ID!, $lineItemId: ID!, $quantity: Int!)
+
+    GET /admin/api/2021-10/orders/{order_rest_id}/fulfillment_orders.json
+    Retrieve a list of fulfillment orders for an order
  */
 
 /**
@@ -330,7 +333,7 @@ export const getOrder = async (id) => {
   const result = await get(`/orders/${id}.json`);
 
   return result.data.order;
-};
+}
 
 export const getOrderByName = async (name) => {
   const result = await get(`/orders.json?name=${name}&status=any`)
@@ -425,3 +428,14 @@ export const cancelOrder = async (id) => {
     return put(`/orders/${orderId}/refunds.json`, changeset);
   }
  };
+
+/**
+ * Return the fulfillmentsOrder for the order
+ * @param {*} id 
+ * @returns 
+ */
+export const fulfillmentOrders = async (id) => {
+  const result = await get(`/orders/${id}/fulfillment_orders.json`, {});
+
+  return result.data.fulfillment_orders;
+};
