@@ -10,7 +10,7 @@ const defaultRouter = new Router({ prefix: "/app" });
 const nestedRoutes = [shopifyRouter, ...appRoutes];
 defaultRouter.get("/ping", koaBody(), async (ctx) => {
 
-  console.log('validate signatuuuuuure', validateSignature(ctx.query))
+  console.log('validate signature', validateSignature(ctx.query))
 
   ctx.body = {
     status: "success",

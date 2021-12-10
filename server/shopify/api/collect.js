@@ -1,7 +1,5 @@
-import axios from "axios";
 import dotenv from "dotenv";
 import _ from "lodash";
-import Bottleneck from "bottleneck";
 import { get, put, post, del, getUrl, getNextPage } from "../query";
 
 dotenv.config();

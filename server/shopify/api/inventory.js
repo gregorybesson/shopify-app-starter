@@ -1,18 +1,11 @@
 import axios from "axios";
 import dotenv from "dotenv";
 import _ from "lodash";
-import fs from "fs";
 import readline from "readline";
-
 import { get, put, post, del, getUrl } from "../query";
-import { getLocations } from "./location";
 import { getFulfillmentServiceByName } from "./fulfillmentService";
 
 dotenv.config();
-
-const {
-  SHOP,
-} = process.env;
 
 /**
  * Get the inventoryLevelId from a SKU
@@ -44,15 +37,7 @@ export const updateInventoryFromInventoryLevel = async (
     },
   };
 
-  const result = await post(
-    `https://${SHOP}/admin/api/2020-04/graphql.json`,
-    query,
-    {
-      headers: {
-        "X-Shopify-Access-Token": ACCESS_TOKEN,
-      },
-    }
-  );
+  const result = await post(`/graphql.json`, query);
 
   return result;
 };
