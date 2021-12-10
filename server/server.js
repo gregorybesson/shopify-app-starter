@@ -60,6 +60,12 @@ async function prepareAuthSession(ctx, next) {
   const { session, query } = ctx;
   let shop = query["shop"];
 
+  if (!shop) {
+    const settings = shopifyAPI.getSettings()
+    if (settings.shopName) {
+      shop = settings.shopName
+    }
+  }
   if (!shop && ctx.hostname.endsWith('myshopify.com')) {
     shop = ctx.hostname
   }
@@ -198,6 +204,8 @@ app.prepare().then(async () => {
     createShopifyAuth({
       async afterAuth(ctx) {
         // Access token and shop available in ctx.state.shopify
+        //console.log('createShopifyAuth ctx.state.shopify', ctx.state.shopify);
+
         const { shop, accessToken, scope } = ctx.state.shopify;
         const host = ctx.query.host;
 
@@ -222,19 +230,6 @@ app.prepare().then(async () => {
     ctx.res.statusCode = 200;
   };
 
-  router.get("/", async (ctx) => {
-    const shop = ctx.query.shop;
-    // const key = { store: "all", sk: `session#id#offline_${shop}` };
-    // const item = await db.getItem(key);
-    // if (!_.get(item, "Item.session.accessToken")) {
-    const offlineSession = await Shopify.Utils.loadOfflineSession(shop)
-    if (!offlineSession || !offlineSession.accessToken) {
-      ctx.redirect(`/auth?shop=${shop}`);
-    } else {
-      await handleRequest(ctx);
-    }
-  });
-
   router.post("/webhooks", async (ctx) => {
     try {
       await Shopify.Webhooks.Registry.process(ctx.req, ctx.res);
@@ -257,8 +252,23 @@ app.prepare().then(async () => {
   // STARTER
   server.use(defaultRouter.routes(), defaultRouter.allowedMethods());
   // /STARTER
-  router.get("(.*)", verifyRequest(), async (ctx) => {
-    await handleRequest(ctx);
+  router.get("(.*)", async (ctx) => {
+    let shop = ctx.query.shop;
+    if (!shop) {
+      const settings = shopifyAPI.getSettings()
+      if (settings.shopName) {
+
+        shop = settings.shopName
+      }
+    }
+    const offlineSession = await Shopify.Utils.loadOfflineSession(shop)
+
+    // This shop hasn't been seen yet, go through OAuth to create a session
+    if (!offlineSession || !offlineSession.accessToken) {
+      ctx.redirect(`/auth?shop=${shop}`);
+    } else {
+      await handleRequest(ctx);
+    }
   });
 
   server.use(router.allowedMethods());

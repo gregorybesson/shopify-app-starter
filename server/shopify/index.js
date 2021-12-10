@@ -17,6 +17,7 @@ export * from "./api/inventoryLevel";
 export * from "./api/location";
 export * from "./api/metafield";
 export * from "./api/order";
+export * from "./api/page";
 export * from "./api/priceRule";
 export * from "./api/product";
 export * from "./api/productImage";

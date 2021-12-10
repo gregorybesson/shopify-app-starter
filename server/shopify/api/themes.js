@@ -285,10 +285,3 @@ export const duplicateAsset = async (
 
   return true;
 };
-
-// /admin/api/2020-07/pages/{page_id}.json
-export const getPage = async (pageId) => {
-  const result = await get(`/pages/${pageId}.json`);
-
-  return result;
-};
