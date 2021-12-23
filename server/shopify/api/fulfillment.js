@@ -106,7 +106,7 @@ export const createOrderFulfillment = async (orderId) => {
       {
         fulfillment: {
           location_id: locationId,
-          message: "Order transmitted to JDE",
+          message: "Order transmitted to fulfillment service",
           notify_customer: false,
           tracking_info: {
             number: 1562678,

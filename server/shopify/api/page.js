@@ -5,23 +5,18 @@ import _ from "lodash";
  *  POST
     /admin/api/2021-10/pages.json
     Create a new Page
-
     GET
     /admin/api/2021-10/pages.json
     Retrieves a list of pages
-
     GET
     /admin/api/2021-10/pages/{page_id}.json
     Retrieves a single page by its ID
-
     GET
     /admin/api/2021-10/pages/count.json
     Retrieves a page count
-
     PUT
     /admin/api/2021-10/pages/{page_id}.json
     Updates a page
-
     DEL
     /admin/api/2021-10/pages/{page_id}.json
     Deletes a page
@@ -59,6 +54,13 @@ export const createPage = async (changeset) => {
 // /admin/api/2020-07/pages/{page_id}.json
 export const getPage = async (pageId) => {
   const result = await get(`/pages/${pageId}.json`);
+
+  return result;
+};
+
+// /admin/api/2021-10/pages.json
+export const getPageByHandle = async (handle) => {
+  const result = await get(`/pages.json?handle=${handle}`);
 
   return result;
 };

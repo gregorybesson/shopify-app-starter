@@ -41,21 +41,13 @@ export const sendMail = async (
   //    path: '/path/to/file.txt'
   //  }
   // ]
+  //console.log('sendMail', from, to, subject, template, changeset, bcc);
 
-  const shop = {
-    email_logo_url:
-      "https://assets.website-files.com/5f4e5c1f49514d483ecd0a29/5f4e5c29aa06964afc1ae7bc_Logo%2520%25231-p-500.png",
-    email_logo_width: "200",
-    email_accent_color: "#000",
-    name: "Livingcolor",
-    url: `https://${SHOP}`,
-  };
-  console.log("sendMail template", template);
   let snippet = await shopify.getAsset(template);
   //console.log('snippet', snippet)
   const engine = new Liquid();
   const tpl = engine.parse(snippet.asset.value);
-  const html = await engine.render(tpl, { shop: shop, ...changeset });
+  const html = await engine.render(tpl, { ...changeset });
   //console.log('html', html)
   // send welcome email
   let mailOptions = {
